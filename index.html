@@ -5,21 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>امپراطوری پارسه</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --gold: #ffcc00;
-            --bg-dark: #121212;
-            --panel: #1e1e2f;
-            --tg-bg: var(--tg-theme-bg-color, #121212);
-            --tg-text: var(--tg-theme-text-color, #ffffff);
+            --gold: #ffb700;
+            --glass: rgba(20, 20, 30, 0.85); /* شیشه‌ای تیره */
+            --border: rgba(255, 215, 0, 0.3);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: var(--tg-bg);
-            color: var(--tg-text);
-            font-family: 'Tahoma', sans-serif;
+            /* تنظیم پس‌زمینه */
+            background-image: url('images/bg.png'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #1a1a1a; /* رنگ پشتیبان */
+            
+            color: white;
+            font-family: 'Tahoma', sans-serif; /* فونت متن‌های ریز */
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -27,173 +34,276 @@
             overflow: hidden;
         }
 
-        /* استایل تصاویر */
-        .icon-img { width: 24px; height: 24px; vertical-align: middle; }
-        .main-img { width: 80px; height: auto; display: block; margin: 0 auto 10px auto; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+        /* فونت تیترها */
+        h1, h2, h3, .big-font { font-family: 'Lalezar', cursive; letter-spacing: 1px; }
 
+        /* --- هدر --- */
         header {
-            background-color: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-bottom: 2px solid var(--gold);
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            z-index: 10;
         }
 
-        .resource-box { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; }
-
-        main { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
-
-        .card {
-            background: var(--panel);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #333;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 15px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            position: relative;
-            color: white;
-            margin-top: 10px;
+        .res-pill {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border);
+            padding: 5px 15px;
+            border-radius: 50px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
+            backdrop-filter: blur(4px);
         }
-        .action-btn:disabled { opacity: 0.5; filter: grayscale(1); }
+        .res-pill img { width: 28px; height: 28px; filter: drop-shadow(0 0 5px gold); }
+        .res-pill span { font-family: 'Lalezar'; font-size: 1.2rem; color: #fff; }
+
+        /* --- بدنه اصلی --- */
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            padding-bottom: 80px; /* جا برای تست */
+        }
+
+        /* --- کارت‌ها (استایل جدید) --- */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+        .card:active { transform: scale(0.98); }
+
+        /* بزرگ کردن و افکت عکس‌ها */
+        .card-img {
+            width: 140px; /* خیلی بزرگتر شد */
+            height: 140px;
+            object-fit: contain;
+            margin: -10px auto 10px auto;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6));
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .card h3 { margin: 5px 0 15px 0; color: var(--gold); font-size: 1.5rem; text-shadow: 0 2px 4px black;}
+
+        /* --- نوار جان --- */
+        .status-row { display: flex; justify-content: space-between; font-size: 0.85rem; color: #aaa; margin-bottom: 5px; }
+        .bar-bg { background: rgba(255,255,255,0.1); height: 10px; border-radius: 10px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #f1c40f, #f39c12); width: 100%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* --- دکمه‌ها --- */
+        .btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 16px;
+            font-family: 'Lalezar';
+            font-size: 1.3rem;
+            color: #000;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+        .btn-farm { background: linear-gradient(45deg, #2ecc71, #27ae60); box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4); }
+        .btn-repair { background: linear-gradient(45deg, #e67e22, #d35400); box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4); color: white; }
         
-        .btn-farm { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-        .btn-repair { background: linear-gradient(135deg, #e67e22, #d35400); }
+        .btn:disabled { background: #555; color: #888; box-shadow: none; cursor: not-allowed; filter: grayscale(1); }
 
-        .durability-track { background: #333; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
-        .durability-bar { height: 100%; background: var(--gold); width: 100%; transition: width 0.3s ease; }
-
-        /* تایمر */
-        .timer-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8); display: none;
-            justify-content: center; align-items: center;
-            font-size: 1.2rem; border-radius: 12px;
+        /* تایمر روی دکمه */
+        .overlay {
+            position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.7); display: none;
+            align-items: center; justify-content: center;
+            color: white; font-size: 1.4rem;
         }
-        .loading .timer-overlay { display: flex; }
+        .btn.loading .overlay { display: flex; }
 
-        /* مودال داستان */
+        /* --- مودال داستان (سینمایی) --- */
         #storyModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); z-index: 1000;
-            display: none; justify-content: center; align-items: center; padding: 20px;
+            display: none; flex-direction: column;
+            justify-content: center; align-items: center; padding: 30px; text-align: center;
         }
-        .story-content {
-            background: #222; padding: 30px; border-radius: 20px;
-            border: 2px solid var(--gold); text-align: center; max-width: 350px;
+        .story-text { font-size: 1.1rem; line-height: 1.8; color: #ddd; max-width: 400px; margin-bottom: 30px; }
+        .story-btn { background: var(--gold); border: none; padding: 12px 40px; border-radius: 50px; font-family: 'Lalezar'; font-size: 1.4rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% {box-shadow: 0 0 0 0 rgba(255, 183, 0, 0.7);} 70% {box-shadow: 0 0 0 10px rgba(255, 183, 0, 0);} 100% {box-shadow: 0 0 0 0 rgba(255, 183, 0, 0);} }
+
+        /* --- پیام‌های گذرا (Toast) --- */
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9); border: 1px solid var(--gold);
+            color: var(--gold); padding: 12px 25px; border-radius: 50px;
+            font-family: 'Lalezar'; font-size: 1.1rem;
+            opacity: 0; transition: opacity 0.5s; z-index: 200; pointer-events: none;
+            width: max-content; max-width: 80%; text-align: center;
         }
-        .log-container { font-size: 0.8rem; color: #aaa; border-top: 1px solid #333; padding-top: 10px; margin-top:10px; height: 100px; overflow-y: auto; text-align: right;}
-        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+        #toast.show { opacity: 1; bottom: 50px; }
+
     </style>
 </head>
 <body>
 
 <div id="storyModal">
-    <div class="story-content">
-        <img src="images/shovel.png" style="width: 100px;">
-        <h2 style="color:var(--gold);">آغاز پارسه</h2>
-        <p>دهخدا بیل کهنه‌ای به تو می‌دهد...<br>با این بیل تمدن را بساز.</p>
-        <button onclick="closeStory()" style="background:var(--gold); border:none; padding:10px 30px; border-radius:20px; font-weight:bold;">شروع</button>
-    </div>
+    <img src="images/shovel.png" style="width:120px; filter:drop-shadow(0 0 20px gold);">
+    <h1 style="color:var(--gold); font-size: 2.5rem; margin: 10px 0;">شکوهِ پارسه</h1>
+    <p class="story-text">
+        درود بر تو ای فرزند ایران!<br>
+        دورانِ خشکسالی و تاریکی رسیده است.<br>
+        پیر خردمندِ دهکده، آخرین بیلِ باقی‌مانده از دورانِ طلایی هخامنشیان را به تو می‌سپارد.<br>
+        <br>
+        <span style="color:var(--gold)">آیا می‌توانی دوباره پردیس را آباد کنی؟</span>
+    </p>
+    <button class="story-btn" onclick="closeStory()">به فرمان یزدان، آغاز می‌کنم</button>
 </div>
 
 <header>
-    <div class="resource-box">
-        <img src="images/bread.png" class="icon-img">
+    <div class="res-pill">
+        <img src="images/bread.png">
         <span id="breadDisplay">0</span>
     </div>
-    <div style="font-size: 1.2rem; opacity: 0.7;">پارسه</div>
-    <div class="resource-box">
-        <img src="images/daric.png" class="icon-img">
+    <div class="res-pill" style="border-color: var(--gold);">
         <span id="daricDisplay" style="color:var(--gold)">0</span>
+        <img src="images/daric.png">
     </div>
 </header>
 
 <main>
     <div class="card">
-        <img src="images/shovel.png" class="main-img" id="shovelImg">
-        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
-            <span>سلامت بیل</span>
+        <h3>زمین‌های بایر</h3>
+        <img src="images/shovel.png" class="card-img" id="shovelImg">
+        
+        <div class="status-row">
+            <span>استحکام بیل</span>
             <span id="durabilityText">3 / 3</span>
         </div>
-        <div class="durability-track">
-            <div class="durability-bar" id="durabilityBar"></div>
+        <div class="bar-bg">
+            <div class="bar-fill" id="durabilityBar"></div>
         </div>
 
-        <button id="farmBtn" class="action-btn btn-farm" onclick="startFarming()">
-            <img src="images/farm.png" style="width:20px;"> شخم زدن
-            <div class="timer-overlay" id="farmTimer">00:00</div>
+        <button id="farmBtn" class="btn btn-farm" onclick="startFarming()">
+            شخم زدن زمین
+            <div class="overlay" id="farmTimer">00:00</div>
         </button>
     </div>
 
     <div class="card">
-        <img src="images/repair.png" class="main-img">
-        <h3>آهنگرسرا</h3>
-        <button id="repairBtn" class="action-btn btn-repair" onclick="startRepair()" disabled>
-            تعمیر بیل
-            <div class="timer-overlay" id="repairTimer">00:00</div>
+        <h3>آهنگرسرای کاوه</h3>
+        <img src="images/repair.png" class="card-img">
+        <button id="repairBtn" class="btn btn-repair" onclick="startRepair()" disabled>
+            بازسازی ابزار
+            <div class="overlay" id="repairTimer">00:00</div>
         </button>
     </div>
-
-    <div class="log-container" id="logArea"></div>
 </main>
+
+<div id="toast">پیام سیستم</div>
 
 <script>
     const CONFIG = { farmTime: 5, repairTime: 10, maxDurability: 3, daricChance: 0.3 };
-    let state = { bread: 0, daric: 0, durability: 3, storySeen: false, farmEnd: 0, repairEnd: 0, logs: [] };
+    let state = { bread: 0, daric: 0, durability: 3, storySeen: false, farmEnd: 0, repairEnd: 0 };
 
     window.onload = function() {
-        if(window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
-        const saved = localStorage.getItem('parseh_img_v1');
+        if(window.Telegram && window.Telegram.WebApp) { 
+            window.Telegram.WebApp.expand(); 
+            window.Telegram.WebApp.enableClosingConfirmation();
+            window.Telegram.WebApp.setHeaderColor('#1a1a1a'); // همرنگ هدر
+        }
+        
+        const saved = localStorage.getItem('parseh_pro_v1');
         if (saved) state = JSON.parse(saved);
+        
         if (!state.storySeen) document.getElementById('storyModal').style.display = 'flex';
-        render(); setInterval(gameLoop, 1000);
+        render(); 
+        setInterval(gameLoop, 1000);
     };
 
-    function save() { localStorage.setItem('parseh_img_v1', JSON.stringify(state)); }
-    function closeStory() { document.getElementById('storyModal').style.display = 'none'; state.storySeen = true; addLog("خوش آمدی ای سازنده!"); save(); }
+    function save() { localStorage.setItem('parseh_pro_v1', JSON.stringify(state)); }
     
+    function closeStory() { 
+        document.getElementById('storyModal').style.opacity = '0';
+        setTimeout(() => document.getElementById('storyModal').style.display = 'none', 500);
+        state.storySeen = true; 
+        showToast("به سرزمین پارس خوش آمدی!"); 
+        save(); 
+    }
+    
+    // --- اکشن‌ها ---
     function startFarming() {
-        if (state.durability <= 0) return;
+        if (state.durability <= 0) {
+            showToast("❌ بیل شکسته است! تعمیرش کن.");
+            return;
+        }
         state.farmEnd = Math.floor(Date.now()/1000) + CONFIG.farmTime;
-        addLog("🌱 در حال کشاورزی..."); save(); render();
+        showToast("👨‍🌾 کشاورز در حال کار است...");
+        save(); render();
     }
     
     function claimFarming() {
-        state.farmEnd = 0; state.bread += 2; state.durability--;
-        let msg = "نان بدست آمد (+2)";
-        if (Math.random() < CONFIG.daricChance) { state.daric++; msg += " و یک سکه پیدا شد! 💰"; }
+        state.farmEnd = 0; 
+        state.bread += 2; 
+        state.durability--;
+        
+        let msg = "🌾 محصول برداشت شد! (+2 نان)";
+        if (Math.random() < CONFIG.daricChance) { 
+            state.daric++; 
+            msg = "💎 گنجی باستانی یافتی! (+1 دریک)";
+        }
+        
         if (state.durability === 0) msg += " (بیل شکست!)";
-        addLog(msg); save(); render();
+        
+        showToast(msg);
+        save(); render();
     }
 
     function startRepair() {
         state.repairEnd = Math.floor(Date.now()/1000) + CONFIG.repairTime;
-        addLog("🔥 بیل به آهنگری رفت..."); save(); render();
+        showToast("🔥 آهنگر کوره را روشن کرد...");
+        save(); render();
     }
 
     function claimRepair() {
-        state.repairEnd = 0; state.durability = CONFIG.maxDurability;
-        addLog("✅ بیل تعمیر شد."); save(); render();
+        state.repairEnd = 0; 
+        state.durability = CONFIG.maxDurability;
+        showToast("✨ بیل مثل روز اول تیز شد!");
+        save(); render();
+    }
+
+    // --- سیستم گرافیک ---
+    function showToast(text) {
+        const toast = document.getElementById('toast');
+        toast.innerText = text;
+        toast.classList.add('show');
+        
+        // ویبره زدن گوشی (فقط در موبایل کار میکند)
+        if(window.navigator && window.navigator.vibrate) window.navigator.vibrate(50);
+
+        setTimeout(() => { toast.classList.remove('show'); }, 3000); // ۳ ثانیه بعد پاک شو
     }
 
     function gameLoop() {
         const now = Math.floor(Date.now()/1000);
         let changed = false;
+        
         if (state.farmEnd > 0) {
             if (now >= state.farmEnd) { claimFarming(); changed = true; }
             else updateTimer('farmTimer', state.farmEnd - now);
@@ -205,11 +315,18 @@
         if(changed) render();
     }
 
+    function updateTimer(id, sec) { document.getElementById(id).innerText = sec + " ثانیه"; }
+
     function render() {
         document.getElementById('breadDisplay').innerText = state.bread;
         document.getElementById('daricDisplay').innerText = state.daric;
         document.getElementById('durabilityText').innerText = `${state.durability} / ${CONFIG.maxDurability}`;
-        document.getElementById('durabilityBar').style.width = (state.durability/3)*100 + '%';
+        
+        // رنگ و اندازه نوار جان
+        const bar = document.getElementById('durabilityBar');
+        const pct = (state.durability / CONFIG.maxDurability) * 100;
+        bar.style.width = pct + '%';
+        bar.style.background = state.durability === 1 ? '#e74c3c' : 'linear-gradient(90deg, #f1c40f, #f39c12)';
         
         const farmBtn = document.getElementById('farmBtn');
         const repairBtn = document.getElementById('repairBtn');
@@ -219,13 +336,7 @@
 
         if(state.repairEnd > 0) { repairBtn.classList.add('loading'); repairBtn.disabled = true; }
         else { repairBtn.classList.remove('loading'); repairBtn.disabled = (state.durability > 0); }
-
-        document.getElementById('logArea').innerHTML = state.logs.map(l => `<div class="log-entry">${l}</div>`).join('');
     }
-
-    function addLog(msg) { state.logs.unshift(msg); if(state.logs.length>10) state.logs.pop(); }
-    function updateTimer(id, sec) { document.getElementById(id).innerText = sec + "s"; }
-
 </script>
 </body>
 </html>
