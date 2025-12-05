@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>امپراطوری پارسه</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --gold: #ffcc00;
+            --bg-dark: #121212;
+            --panel: #1e1e2f;
+            --tg-bg: var(--tg-theme-bg-color, #121212);
+            --tg-text: var(--tg-theme-text-color, #ffffff);
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--tg-bg);
+            color: var(--tg-text);
+            font-family: 'Tahoma', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* استایل تصاویر */
+        .icon-img { width: 24px; height: 24px; vertical-align: middle; }
+        .main-img { width: 80px; height: auto; display: block; margin: 0 auto 10px auto; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
+
+        header {
+            background-color: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-bottom: 2px solid var(--gold);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .resource-box { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 1.1rem; }
+
+        main { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; }
+
+        .card {
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #333;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            color: white;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .action-btn:disabled { opacity: 0.5; filter: grayscale(1); }
+        
+        .btn-farm { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .btn-repair { background: linear-gradient(135deg, #e67e22, #d35400); }
+
+        .durability-track { background: #333; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        .durability-bar { height: 100%; background: var(--gold); width: 100%; transition: width 0.3s ease; }
+
+        /* تایمر */
+        .timer-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); display: none;
+            justify-content: center; align-items: center;
+            font-size: 1.2rem; border-radius: 12px;
+        }
+        .loading .timer-overlay { display: flex; }
+
+        /* مودال داستان */
+        #storyModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 1000;
+            display: none; justify-content: center; align-items: center; padding: 20px;
+        }
+        .story-content {
+            background: #222; padding: 30px; border-radius: 20px;
+            border: 2px solid var(--gold); text-align: center; max-width: 350px;
+        }
+        .log-container { font-size: 0.8rem; color: #aaa; border-top: 1px solid #333; padding-top: 10px; margin-top:10px; height: 100px; overflow-y: auto; text-align: right;}
+        .log-entry { margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px;}
+    </style>
+</head>
+<body>
+
+<div id="storyModal">
+    <div class="story-content">
+        <img src="images/shovel.png" style="width: 100px;">
+        <h2 style="color:var(--gold);">آغاز پارسه</h2>
+        <p>دهخدا بیل کهنه‌ای به تو می‌دهد...<br>با این بیل تمدن را بساز.</p>
+        <button onclick="closeStory()" style="background:var(--gold); border:none; padding:10px 30px; border-radius:20px; font-weight:bold;">شروع</button>
+    </div>
+</div>
+
+<header>
+    <div class="resource-box">
+        <img src="images/bread.png" class="icon-img">
+        <span id="breadDisplay">0</span>
+    </div>
+    <div style="font-size: 1.2rem; opacity: 0.7;">پارسه</div>
+    <div class="resource-box">
+        <img src="images/daric.png" class="icon-img">
+        <span id="daricDisplay" style="color:var(--gold)">0</span>
+    </div>
+</header>
+
+<main>
+    <div class="card">
+        <img src="images/shovel.png" class="main-img" id="shovelImg">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+            <span>سلامت بیل</span>
+            <span id="durabilityText">3 / 3</span>
+        </div>
+        <div class="durability-track">
+            <div class="durability-bar" id="durabilityBar"></div>
+        </div>
+
+        <button id="farmBtn" class="action-btn btn-farm" onclick="startFarming()">
+            <img src="images/farm.png" style="width:20px;"> شخم زدن
+            <div class="timer-overlay" id="farmTimer">00:00</div>
+        </button>
+    </div>
+
+    <div class="card">
+        <img src="images/repair.png" class="main-img">
+        <h3>آهنگرسرا</h3>
+        <button id="repairBtn" class="action-btn btn-repair" onclick="startRepair()" disabled>
+            تعمیر بیل
+            <div class="timer-overlay" id="repairTimer">00:00</div>
+        </button>
+    </div>
+
+    <div class="log-container" id="logArea"></div>
+</main>
+
+<script>
+    const CONFIG = { farmTime: 5, repairTime: 10, maxDurability: 3, daricChance: 0.3 };
+    let state = { bread: 0, daric: 0, durability: 3, storySeen: false, farmEnd: 0, repairEnd: 0, logs: [] };
+
+    window.onload = function() {
+        if(window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
+        const saved = localStorage.getItem('parseh_img_v1');
+        if (saved) state = JSON.parse(saved);
+        if (!state.storySeen) document.getElementById('storyModal').style.display = 'flex';
+        render(); setInterval(gameLoop, 1000);
+    };
+
+    function save() { localStorage.setItem('parseh_img_v1', JSON.stringify(state)); }
+    function closeStory() { document.getElementById('storyModal').style.display = 'none'; state.storySeen = true; addLog("خوش آمدی ای سازنده!"); save(); }
+    
+    function startFarming() {
+        if (state.durability <= 0) return;
+        state.farmEnd = Math.floor(Date.now()/1000) + CONFIG.farmTime;
+        addLog("🌱 در حال کشاورزی..."); save(); render();
+    }
+    
+    function claimFarming() {
+        state.farmEnd = 0; state.bread += 2; state.durability--;
+        let msg = "نان بدست آمد (+2)";
+        if (Math.random() < CONFIG.daricChance) { state.daric++; msg += " و یک سکه پیدا شد! 💰"; }
+        if (state.durability === 0) msg += " (بیل شکست!)";
+        addLog(msg); save(); render();
+    }
+
+    function startRepair() {
+        state.repairEnd = Math.floor(Date.now()/1000) + CONFIG.repairTime;
+        addLog("🔥 بیل به آهنگری رفت..."); save(); render();
+    }
+
+    function claimRepair() {
+        state.repairEnd = 0; state.durability = CONFIG.maxDurability;
+        addLog("✅ بیل تعمیر شد."); save(); render();
+    }
+
+    function gameLoop() {
+        const now = Math.floor(Date.now()/1000);
+        let changed = false;
+        if (state.farmEnd > 0) {
+            if (now >= state.farmEnd) { claimFarming(); changed = true; }
+            else updateTimer('farmTimer', state.farmEnd - now);
+        }
+        if (state.repairEnd > 0) {
+            if (now >= state.repairEnd) { claimRepair(); changed = true; }
+            else updateTimer('repairTimer', state.repairEnd - now);
+        }
+        if(changed) render();
+    }
+
+    function render() {
+        document.getElementById('breadDisplay').innerText = state.bread;
+        document.getElementById('daricDisplay').innerText = state.daric;
+        document.getElementById('durabilityText').innerText = `${state.durability} / ${CONFIG.maxDurability}`;
+        document.getElementById('durabilityBar').style.width = (state.durability/3)*100 + '%';
+        
+        const farmBtn = document.getElementById('farmBtn');
+        const repairBtn = document.getElementById('repairBtn');
+        
+        if(state.farmEnd > 0) { farmBtn.classList.add('loading'); farmBtn.disabled = true; }
+        else { farmBtn.classList.remove('loading'); farmBtn.disabled = (state.durability <= 0); }
+
+        if(state.repairEnd > 0) { repairBtn.classList.add('loading'); repairBtn.disabled = true; }
+        else { repairBtn.classList.remove('loading'); repairBtn.disabled = (state.durability > 0); }
+
+        document.getElementById('logArea').innerHTML = state.logs.map(l => `<div class="log-entry">${l}</div>`).join('');
+    }
+
+    function addLog(msg) { state.logs.unshift(msg); if(state.logs.length>10) state.logs.pop(); }
+    function updateTimer(id, sec) { document.getElementById(id).innerText = sec + "s"; }
+
+</script>
+</body>
+</html>
