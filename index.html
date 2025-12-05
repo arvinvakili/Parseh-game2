@@ -9,21 +9,20 @@
     <style>
         :root {
             --bg-color: #000;
-            --gold: #ffc107;     /* طلایی روشن */
-            --gold-dark: #b7892b; /* طلایی تیره */
-            --glass: rgba(30, 30, 30, 0.65); /* شیشه ای نیمه شفاف */
-            --nav-bg: #0f0f0f;
+            --gold: #ffc107;
+            --gold-glow: rgba(255, 193, 7, 0.6);
+            --glass: rgba(20, 20, 20, 0.85);
+            --nav-bg: #0a0a0a;
+            --text-main: #f5f5f5;
         }
 
-        /* حذف هرگونه تاخیر و انتخاب متن */
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; outline: none; touch-action: manipulation; }
 
         body {
             background: url('images/bg.png') no-repeat center center fixed; 
             background-size: cover;
             background-color: var(--bg-color);
-            color: #fff;
-            /* فونت خوانا و باصلابت */
+            color: var(--text-main);
             font-family: 'Tahoma', serif; 
             margin: 0;
             height: 100vh;
@@ -32,38 +31,50 @@
             overflow: hidden;
         }
 
-        /* --- سربرگ --- */
+        /* --- سربرگ اطلاعات --- */
         header {
-            height: 70px;
+            height: 85px; /* ارتفاع بیشتر برای نمایش مرتبه */
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
-            z-index: 20;
-        }
-
-        .resource-pill {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 12px;
-            padding: 6px 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 110px;
+            flex-direction: column;
             justify-content: center;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            padding: 0 15px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.2) 100%);
+            z-index: 20;
+            gap: 5px;
         }
-        /* آیکون‌های هدر بزرگتر و واضح‌تر */
-        .resource-pill img { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 0 5px gold); }
-        .resource-pill span { font-weight: bold; font-size: 1.2rem; color: #fff; text-shadow: 1px 1px 2px #000; }
 
-        /* --- کانتینر اصلی --- */
+        .top-row { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        
+        .resource-pill {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 10px;
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 90px;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .resource-pill img { width: 35px; height: 35px; filter: drop-shadow(0 0 5px var(--gold)); }
+        .resource-pill span { font-weight: bold; font-size: 1.1rem; color: #fff; }
+
+        /* نوار کارآزمودگی (XP) */
+        .xp-container {
+            width: 100%; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: #ccc;
+        }
+        .xp-bar-bg {
+            flex: 1; height: 6px; background: #333; border-radius: 3px; overflow: hidden; border: 1px solid #555;
+        }
+        .xp-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #00bfa5, #1de9b6); width: 0%;
+            box-shadow: 0 0 10px #1de9b6; transition: width 0.5s ease;
+        }
+
+        /* --- بدنه اصلی --- */
         #main-container { flex: 1; position: relative; width: 100%; }
 
-        /* صفحات */
         .view-section {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: none; flex-direction: column; align-items: center; justify-content: center; 
@@ -71,111 +82,143 @@
         }
         .view-section.active { display: flex; z-index: 2; }
 
-        /* --- پنل شیشه‌ای (اصلاح شده) --- */
+        /* --- پنل شیشه‌ای --- */
         .glass-card {
             background-color: var(--glass);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            border-radius: 20px;
-            padding: 30px 20px;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 24px;
+            padding: 25px 20px;
             width: 100%;
-            max-width: 360px;
+            max-width: 380px;
             text-align: center;
-            /* تاری پس‌زمینه (Glassmorphism) */
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.7);
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
             position: relative;
         }
         
-        /* تزیین دور پنل */
-        .glass-card::before {
-            content: ''; position: absolute; inset: 0; border-radius: 20px; padding: 2px;
-            background: linear-gradient(180deg, rgba(255,215,0,0.3), transparent); 
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+        /* تزیین طلایی */
+        .glass-card::after {
+            content: ''; position: absolute; inset: 5px; border: 1px dashed rgba(255,215,0,0.1); 
+            border-radius: 20px; pointer-events: none;
         }
 
-        .glass-card h2 { margin: 0 0 25px 0; color: var(--gold); font-size: 1.8rem; text-shadow: 0 2px 5px #000; font-weight: normal; letter-spacing: -0.5px; }
+        .glass-card h2 { 
+            margin: 0 0 20px 0; color: var(--gold); font-size: 1.8rem; 
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.4); font-weight: normal;
+        }
         
-        /* تصاویر بزرگ و با صلابت */
-        .img-wrapper {
-            width: 160px; height: 160px; margin: 0 auto 20px auto;
+        /* تصویر بزرگ و باصلابت */
+        .main-icon-container {
+            width: 180px; height: 180px; margin: 0 auto 20px auto;
             display: flex; justify-content: center; align-items: center;
-            background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%); /* هاله نورانی */
+            /* هاله نور پشت تصویر */
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 60%);
         }
         .main-icon { 
             width: 100%; height: 100%; object-fit: contain; 
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.6)); 
-            transform: scale(1.1); /* بزرگنمایی */
+            filter: drop-shadow(0 15px 15px rgba(0,0,0,0.7)); 
+            transform: scale(1.1); transition: transform 0.3s;
         }
 
-        /* نوار توان */
-        .status-row { display: flex; justify-content: space-between; color: #ccc; font-size: 0.95rem; margin-bottom: 8px; font-weight: bold; }
-        .bar-container { width: 100%; height: 14px; background: rgba(0,0,0,0.8); border-radius: 7px; border: 1px solid #444; overflow: hidden; margin-bottom: 25px; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #b7892b, #ffd700); width: 100%; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px #ffd700; }
+        /* نوار توان (جان) */
+        .status-info { display: flex; justify-content: space-between; color: #aaa; font-size: 0.9rem; margin-bottom: 5px; }
+        .durability-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444; margin-bottom: 25px; }
+        .durability-fill { height: 100%; background: linear-gradient(90deg, #ff8f00, #ff6f00); width: 100%; transition: width 0.3s; }
 
-        /* --- دکمه سنگی باستانی --- */
+        /* --- دکمه سنگی --- */
         .stone-btn {
-            width: 100%; padding: 22px;
+            width: 100%; padding: 24px;
             background-color: #3e2723;
-            /* بافت سنگی */
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
-            border: none; border-radius: 12px;
-            color: #ffe082; font-size: 1.5rem; font-weight: bold; cursor: pointer; position: relative;
-            box-shadow: 0 6px 0 #1b0000, 0 15px 20px rgba(0,0,0,0.5);
-            transition: transform 0.05s, box-shadow 0.05s;
-            text-shadow: 0 -2px 2px rgba(0,0,0,1);
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
+            border: none; border-radius: 14px;
+            color: #ffe082; font-size: 1.6rem; font-weight: bold; cursor: pointer; position: relative;
+            box-shadow: 0 8px 0 #1b0000, 0 20px 30px rgba(0,0,0,0.6);
+            transition: transform 0.1s;
+            text-shadow: 0 -1px 2px rgba(0,0,0,1);
         }
+        .stone-btn:active { transform: translateY(8px); box-shadow: 0 0 0 #1b0000; }
+        .stone-btn:disabled { background-color: #222; color: #555; box-shadow: 0 8px 0 #111; filter: grayscale(1); cursor: default; }
 
-        .stone-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #1b0000; }
-        .stone-btn:disabled { background-color: #2c2c2c; color: #555; box-shadow: 0 6px 0 #111; filter: grayscale(1); }
-
-        /* تایمر روی دکمه */
         .timer-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); border-radius: 12px;
+            background: rgba(0,0,0,0.9); border-radius: 14px;
             display: none; align-items: center; justify-content: center;
-            color: var(--gold); font-size: 1.6rem;
+            color: var(--gold); font-size: 1.8rem; font-weight: bold;
         }
         .stone-btn.loading .timer-overlay { display: flex; }
 
-        /* --- منوی پایین --- */
+        /* --- فهرست پایین (۴ گزینه) --- */
         .nav-bar {
-            height: 80px; background: var(--nav-bg); display: grid; grid-template-columns: 1fr 1fr 1fr;
-            border-top: 2px solid #3e2723; z-index: 30; box-shadow: 0 -10px 30px rgba(0,0,0,0.8);
+            height: 80px; background: var(--nav-bg); 
+            display: grid; grid-template-columns: repeat(4, 1fr); /* ۴ ستون */
+            border-top: 2px solid #3e2723; z-index: 30; box-shadow: 0 -10px 40px rgba(0,0,0,0.9);
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; cursor: pointer; }
-        .nav-item.active { color: var(--gold); background: linear-gradient(to top, rgba(255,215,0,0.05), transparent); border-top: 3px solid var(--gold); }
-        .nav-icon { font-size: 1.8rem; margin-bottom: 5px; filter: drop-shadow(0 2px 3px #000); }
-        .nav-text { font-size: 0.9rem; font-weight: bold; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; cursor: pointer; transition: all 0.2s; }
+        .nav-item.active { color: var(--gold); background: linear-gradient(to top, rgba(255,215,0,0.08), transparent); border-top: 3px solid var(--gold); }
+        .nav-icon { font-size: 1.6rem; margin-bottom: 5px; filter: drop-shadow(0 2px 2px #000); }
+        .nav-text { font-size: 0.85rem; font-weight: bold; }
 
-        /* --- پیک (Toast) --- */
+        /* --- پیک سامانه (Toast) --- */
         #toast {
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
-            background: #1a1a1a; border: 2px solid var(--gold); color: var(--gold);
-            padding: 12px 30px; border-radius: 10px; font-size: 1.1rem; 
+            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
+            background: #111; border: 2px solid var(--gold); color: var(--gold);
+            padding: 12px 30px; border-radius: 12px; font-size: 1.1rem; 
             opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
-            white-space: nowrap; box-shadow: 0 10px 30px rgba(0,0,0,1); font-weight: bold;
+            white-space: nowrap; box-shadow: 0 10px 40px rgba(0,0,0,1); font-weight: bold;
         }
-        #toast.show { opacity: 1; bottom: 120px; }
+        #toast.show { opacity: 1; bottom: 130px; }
 
-        /* --- مودال داستان (پیش فرض باز است) --- */
+        /* --- مودال آغازین --- */
         #storyModal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.98); z-index: 2000;
-            display: flex; /* پیش فرض باز */
-            flex-direction: column; justify-content: center; align-items: center; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
             padding: 30px; text-align: center;
         }
         .story-card {
-            background: #1a1a1a; border: 2px solid var(--gold); padding: 30px; border-radius: 20px;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2); max-width: 400px;
+            background: #151515; border: 2px solid var(--gold); padding: 40px 30px; border-radius: 24px;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.15); max-width: 400px;
         }
-        .story-text { font-size: 1.2rem; line-height: 1.8; color: #ddd; margin: 20px 0; }
         .story-btn { 
-            background: var(--gold); color: #000; border: none; padding: 15px 40px; 
-            border-radius: 8px; font-size: 1.2rem; font-weight: bold; cursor: pointer; box-shadow: 0 0 15px var(--gold); 
+            background: var(--gold); color: #000; border: none; padding: 16px 50px; 
+            border-radius: 10px; font-size: 1.3rem; font-weight: bold; cursor: pointer; 
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); margin-top: 20px;
         }
+
+        /* --- انیمیشن ارتقای مرتبه (فوق حرفه‌ای) --- */
+        #levelUpModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 3000;
+            display: none; align-items: center; justify-content: center;
+            perspective: 1000px;
+        }
+        
+        .level-up-tablet {
+            width: 300px; padding: 40px 20px;
+            background: linear-gradient(135deg, #FFD700, #FDB931, #FFD700);
+            border: 4px solid #fff; border-radius: 15px;
+            text-align: center; color: #3e2723;
+            box-shadow: 0 0 50px var(--gold), inset 0 0 20px #fff;
+            transform: translateY(100px) rotateX(20deg); opacity: 0;
+            animation: levelUpAppear 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            position: relative; overflow: hidden;
+        }
+
+        /* پرتوهای نور */
+        .ray-box {
+            position: absolute; top: 50%; left: 50%; width: 600px; height: 600px;
+            background: conic-gradient(from 0deg, transparent 0deg, var(--gold-glow) 20deg, transparent 40deg, transparent 360deg);
+            transform: translate(-50%, -50%); animation: rotateRay 4s linear infinite; z-index: -1;
+        }
+
+        @keyframes levelUpAppear {
+            to { transform: translateY(0) rotateX(0deg); opacity: 1; }
+        }
+        @keyframes rotateRay { from {transform: translate(-50%, -50%) rotate(0deg);} to {transform: translate(-50%, -50%) rotate(360deg);} }
+
+        .lvl-title { font-size: 2.5rem; font-weight: bold; margin: 0; text-shadow: 1px 1px 0 #fff; }
+        .lvl-desc { font-size: 1.2rem; margin: 10px 0; font-weight: bold; }
 
     </style>
 </head>
@@ -183,25 +226,49 @@
 
 <div id="storyModal">
     <div class="story-card">
-        <img src="images/shovel.png" style="width:100px; filter:drop-shadow(0 0 15px gold);" onerror="this.style.display='none'">
+        <img src="images/shovel.png" style="width:120px; filter:drop-shadow(0 0 20px gold);" onerror="this.style.display='none'">
         <h1 style="color:var(--gold); margin:15px 0;">شکوهِ پارسه</h1>
-        <p class="story-text">
-            درود بر تو ای نجیب‌زاده.<br>
-            دوران نوسازی فرارسیده است.<br>
-            با این ابزار کهن، امپراطوری را دوباره بساز.
+        <p style="font-size: 1.2rem; line-height: 1.8; color: #ddd;">
+            درود بر فرمانروا.<br>
+            دوران زرین آغاز شده است.<br>
+            با درایت خود، بر پایه‌ها بیفزایید.
         </p>
-        <button class="story-btn" onclick="closeStory()">آغاز امپراطوری</button>
+        <button class="story-btn" onclick="closeStory()">آغاز فرمانروایی</button>
+    </div>
+</div>
+
+<div id="levelUpModal">
+    <div class="ray-box"></div> <div class="ray-box" style="animation-delay: -2s;"></div>
+    
+    <div class="level-up-tablet">
+        <div style="font-size: 4rem;">🏆</div>
+        <h1 class="lvl-title">ارتقای پایه!</h1>
+        <p class="lvl-desc">تبریک! به پایه <span id="newLevelNum">2</span> رسیدید.</p>
+        <button class="story-btn" onclick="closeLevelUp()" style="padding: 10px 30px; font-size: 1rem;">بسیار عالی</button>
     </div>
 </div>
 
 <header>
-    <div class="resource-pill">
-        <img src="images/bread.png" alt="نان">
-        <span id="breadDisplay">0</span>
+    <div class="top-row">
+        <div class="resource-pill">
+            <img src="images/bread.png" alt="نان">
+            <span id="breadDisplay">0</span>
+        </div>
+        <div style="color:var(--gold); font-weight:bold; font-size:1.2rem; text-shadow:0 0 10px rgba(255,193,7,0.5);">
+            پایه <span id="levelDisplay">1</span>
+        </div>
+        <div class="resource-pill">
+            <span id="daricDisplay" style="color:var(--gold)">0</span>
+            <img src="images/daric.png" alt="دریک">
+        </div>
     </div>
-    <div class="resource-pill">
-        <span id="daricDisplay" style="color:var(--gold)">0</span>
-        <img src="images/daric.png" alt="دریک">
+    
+    <div class="xp-container">
+        <span>کارآزمودگی:</span>
+        <div class="xp-bar-bg">
+            <div class="xp-bar-fill" id="xpBar"></div>
+        </div>
+        <span id="xpText">0 / 100</span>
     </div>
 </header>
 
@@ -210,16 +277,16 @@
     <div class="view-section active" id="view-farm">
         <div class="glass-card">
             <h2>کشتزارهای پارس</h2>
-            <div class="img-wrapper">
+            <div class="main-icon-container">
                 <img src="images/shovel.png" class="main-icon" onerror="this.style.display='none'">
             </div>
             
-            <div class="status-row">
+            <div class="status-info">
                 <span>توان ابزار</span>
                 <span id="durabilityText">3 / 3</span>
             </div>
-            <div class="bar-container">
-                <div class="bar-fill" id="durabilityBar"></div>
+            <div class="durability-bg">
+                <div class="durability-fill" id="durabilityBar"></div>
             </div>
 
             <button id="farmBtn" class="stone-btn" onclick="startFarming()">
@@ -232,10 +299,10 @@
     <div class="view-section" id="view-smith">
         <div class="glass-card">
             <h2>آهنگرسرای کاوه</h2>
-            <div class="img-wrapper">
+            <div class="main-icon-container">
                 <img src="images/repair.png" class="main-icon" onerror="this.style.display='none'">
             </div>
-            <p style="color:#aaa; font-size:1rem; margin-bottom: 30px;">بازسازی ابزارهای شکسته</p>
+            <p style="color:#aaa; font-size:1.1rem; margin-bottom: 30px;">نوسازی ابزارهای فرسوده</p>
             <button id="repairBtn" class="stone-btn" onclick="startRepair()" disabled>
                 نوسازی ابزار
                 <div class="timer-overlay" id="repairTimer">00:00</div>
@@ -243,150 +310,27 @@
         </div>
     </div>
 
-    <div class="view-section" id="view-tribe">
+    <div class="view-section" id="view-herd">
+        <div class="glass-card">
+            <h2>گله‌داری</h2>
+            <div class="main-icon-container">
+                 <img src="images/bread.png" class="main-icon" style="filter: hue-rotate(180deg);" onerror="this.style.display='none'">
+            </div>
+            <p style="color:#aaa;">پرورش دام و تولید شیر</p>
+            <button class="stone-btn" onclick="showToast('این بخش در پایه ۳ گشوده می‌شود', 3000)">
+                ورود به چراگاه
+            </button>
         </div>
+    </div>
+
+    <div class="view-section" id="view-tribe">
+        <div class="glass-card">
+            <h2>خاندان‌های پارس</h2>
+            <p style="color:#aaa; margin-top:20px;">اتحاد با دیگر فرمانروایان</p>
+        </div>
+    </div>
 </div>
 
 <nav class="nav-bar">
     <div class="nav-item active" onclick="switchTab('view-farm', this)">
-        <div class="nav-icon">🌾</div>
-        <div class="nav-text">کشتزار</div>
-    </div>
-    <div class="nav-item" onclick="switchTab('view-smith', this)">
-        <div class="nav-icon">🔨</div>
-        <div class="nav-text">آهنگری</div>
-    </div>
-    <div class="nav-item" onclick="handleTribeClick(this)">
-        <div class="nav-icon">🛡️</div>
-        <div class="nav-text">خاندان</div>
-    </div>
-</nav>
-
-<div id="toast">پیک سامانه</div>
-
-<script>
-    // تنظیمات پارسی
-    const CONFIG = { farmTime: 5, repairTime: 10, maxDurability: 3, daricChance: 0.05 };
-    const SAVE_KEY = 'PARSEH_RELEASE_V1'; // کلید نهایی انتشار
-
-    // وضعیت اولیه
-    let state = { bread: 0, daric: 0, durability: 3, farmEnd: 0, repairEnd: 0, storySeen: false };
-
-    // کش کردن المان‌های DOM برای سرعت نور
-    const els = {};
-
-    window.onload = function() {
-        // کش کردن المان‌ها (دیگر در هر فریم جستجو نمیکنیم)
-        ['breadDisplay','daricDisplay','durabilityText','durabilityBar',
-         'farmBtn','farmTimer','repairBtn','repairTimer','toast','storyModal'].forEach(id => els[id] = document.getElementById(id));
-
-        if(window.Telegram && window.Telegram.WebApp) { 
-            window.Telegram.WebApp.expand(); 
-            window.Telegram.WebApp.setHeaderColor('#000000');
-        }
-        
-        loadGame();
-        
-        // اگر داستان دیده شده، مودال را بردار
-        if(state.storySeen) {
-            els.storyModal.style.display = 'none';
-        }
-
-        render(true); // رندر اجباری اول
-        setInterval(gameLoop, 1000);
-    };
-
-    function loadGame() {
-        const saved = localStorage.getItem(SAVE_KEY);
-        if (saved) { try { state = JSON.parse(saved); } catch(e) {} }
-    }
-    function save() { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }
-
-    function closeStory() {
-        els.storyModal.style.display = 'none';
-        state.storySeen = true;
-        showToast("به سرزمین پارس خوش آمدید");
-        save();
-    }
-
-    function switchTab(viewId, navElem) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.getElementById(viewId).classList.add('active');
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        if(navElem) navElem.classList.add('active');
-        if(navigator.vibrate) navigator.vibrate(10);
-    }
-
-    function handleTribeClick(navElem) {
-        showToast("این بخش به زودی گشوده می‌شود...", 3000);
-    }
-
-    // منطق بازی
-    function startFarming() {
-        if (state.durability <= 0) { showToast("ابزار شکسته است! بازسازی کنید."); return; }
-        state.farmEnd = Math.floor(Date.now()/1000) + CONFIG.farmTime;
-        save(); render(true);
-    }
-    
-    function claimFarming() {
-        state.farmEnd = 0; state.bread += 2; state.durability--;
-        let msg = "برداشت شد: +2 نان";
-        if (Math.random() < CONFIG.daricChance) { state.daric++; msg = "دریک زرین یافت شد!"; }
-        if (state.durability === 0) msg += " (ابزار شکست)";
-        showToast(msg); save(); render(true);
-    }
-
-    function startRepair() {
-        state.repairEnd = Math.floor(Date.now()/1000) + CONFIG.repairTime;
-        save(); render(true);
-    }
-
-    function claimRepair() {
-        state.repairEnd = 0; state.durability = CONFIG.maxDurability;
-        showToast("ابزار نوسازی شد"); save(); render(true);
-    }
-
-    function showToast(text) {
-        els.toast.innerText = text; els.toast.classList.add('show');
-        setTimeout(() => { els.toast.classList.remove('show'); }, 3000);
-    }
-
-    function gameLoop() {
-        const now = Math.floor(Date.now()/1000); let needsUpdate = false;
-        
-        if (state.farmEnd > 0) { 
-            if (now >= state.farmEnd) { claimFarming(); needsUpdate = true; } 
-            else { els.farmTimer.innerText = (state.farmEnd - now) + " پنگان"; }
-        }
-        if (state.repairEnd > 0) { 
-            if (now >= state.repairEnd) { claimRepair(); needsUpdate = true; } 
-            else { els.repairTimer.innerText = (state.repairEnd - now) + " پنگان"; }
-        }
-        // رندر فقط اگر نیاز بود (برای سرعت)
-        if(needsUpdate) render();
-    }
-
-    function render(force = false) {
-        // بروزرسانی مقادیر DOM
-        els.breadDisplay.innerText = state.bread;
-        els.daricDisplay.innerText = state.daric;
-        els.durabilityText.innerText = `${state.durability} / ${CONFIG.maxDurability}`;
-        els.durabilityBar.style.width = (state.durability / CONFIG.maxDurability) * 100 + '%';
-        
-        // دکمه کشت
-        if(state.farmEnd > 0) { 
-            els.farmBtn.classList.add('loading'); els.farmBtn.disabled = true; 
-        } else { 
-            els.farmBtn.classList.remove('loading'); els.farmBtn.disabled = (state.durability <= 0); 
-        }
-
-        // دکمه آهنگری
-        if(state.repairEnd > 0) { 
-            els.repairBtn.classList.add('loading'); els.repairBtn.disabled = true; 
-        } else { 
-            els.repairBtn.classList.remove('loading'); els.repairBtn.disabled = (state.durability > 0); 
-        }
-    }
-</script>
-</body>
-</html>
+        <div class="nav-
