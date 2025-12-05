@@ -7,8 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        :root { --bg: #000; --gold: #ffc107; --glass: rgba(20, 20, 20, 0.95); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
+        /* --- استایل‌ها --- */
+        :root { --bg: #000; --gold: #ffc107; --panel: rgba(20,20,20,0.95); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         
         body {
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
@@ -16,7 +17,7 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- مودال شروع --- */
+        /* مودال شروع */
         #start-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -31,20 +32,20 @@
             cursor: pointer; box-shadow: 0 0 20px var(--gold);
         }
 
-        /* --- هدر --- */
-        header { height: 110px; background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent); padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; }
+        /* هدر */
+        header { height: 110px; background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent); padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; }
         .row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .pill { background: rgba(50,50,50,0.8); border: 1px solid #555; border-radius: 12px; padding: 5px 12px; display: flex; align-items: center; gap: 8px; }
         .pill img { width: 28px; height: 28px; }
         
-        /* --- بدنه --- */
+        /* بدنه */
         #game-area { flex: 1; position: relative; width: 100%; }
         .tab-content { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 100px; }
         .tab-content.active { display: flex; }
 
         /* کارت */
         .card {
-            background: var(--glass); border: 2px solid #3e2723; border-radius: 20px;
+            background: var(--panel); border: 2px solid #3e2723; border-radius: 20px;
             padding: 20px; width: 100%; max-width: 360px; text-align: center; margin-bottom: 20px;
             box-shadow: 0 10px 30px #000;
         }
@@ -77,9 +78,14 @@
             background: #222; border: 1px solid var(--gold); color: var(--gold);
             padding: 10px 25px; border-radius: 10px; display: none; z-index: 20000; white-space: nowrap;
         }
+        
+        /* دیباگر */
+        #error-box { display: none; position: fixed; top:0; left:0; width:100%; background:red; color:white; font-size:10px; z-index:99999; }
     </style>
 </head>
 <body>
+
+<div id="error-box"></div>
 
 <div id="start-modal">
     <div class="modal-box">
@@ -115,7 +121,7 @@
             <div style="width:100%; height:8px; background:#000; border-radius:4px; margin-bottom:10px;"><div id="bar-dur" style="width:100%; height:100%; background:orange;"></div></div>
 
             <button id="btn-farm" class="btn btn-act" onclick="doFarm()">
-                کشت (۳۵ دقیقه)
+                کشت (۳۵ پنگان)
                 <div class="timer" id="t-farm">00:00</div>
             </button>
             
@@ -133,7 +139,7 @@
             <div style="font-size:3rem; display:none;">🔥</div>
             <p style="color:#aaa;">بازسازی ابزار</p>
             <button id="btn-rep" class="btn btn-act" onclick="doRep()">
-                بازسازی (۱۵ دقیقه)
+                بازسازی (۱۵ پنگان)
                 <div class="timer" id="t-rep">00:00</div>
             </button>
         </div>
@@ -177,15 +183,203 @@
         rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
     };
 
-    // متغیرهای جهانی
+    // متغیرهای جهانی (Global)
     var G = {
         bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, fc:0,
         end: {farm:0, glean:0, rep:0, cow:0, sheep:0, goat:0},
         animals: {}, seen: false, pt:0
     };
 
-    // --- توابع مستقیم (بدون window.onload) ---
+    // توابع کمکی
+    function el(id) { return document.getElementById(id); }
+    function now() { return Math.floor(Date.now()/1000); }
+    function save() { localStorage.setItem('PARSEH_V27_FINAL', JSON.stringify(G)); }
+    function msg(txt) {
+        let t = el('toast'); t.innerText = txt; t.style.display='block';
+        setTimeout(function(){ t.style.display='none'; }, 3000);
+    }
+    function fmt(s) {
+        let m = Math.floor(s/60); let sec = s%60;
+        return m + ":" + (sec<10?"0":"") + sec;
+    }
+
+    // --- توابع اصلی بازی ---
 
     function startGame() {
-        document.getElementById('start-modal').style.display = 'none';
-        G.seen = true; save
+        el('start-modal').style.display = 'none';
+        G.seen = true; save(); msg("خوش آمدید");
+    }
+
+    function goTab(n) {
+        document.querySelectorAll('.tab-content').forEach(function(x){ x.classList.remove('active'); });
+        el('tab-'+n).classList.add('active');
+        document.querySelectorAll('.nav-btn').forEach(function(x){ x.classList.remove('active'); });
+        el('n'+n).classList.add('active');
+        if(n===3) renderHerd();
+    }
+
+    function doFarm() {
+        if(G.dur<=0) { msg("ابزار شکسته"); return; }
+        G.end.farm = now() + CFG.farm; save(); render();
+    }
+    
+    function finFarm() {
+        G.end.farm = 0; G.bread += 2; G.dur--; G.fc++;
+        let idx = Math.min(G.lvl, 8) - 1;
+        if(G.fc >= CFG.reqs[idx]) { 
+            G.fc = 0; addXP(CFG.xps[idx]); 
+        } else {
+            msg("+2 نان");
+            if(Math.random()<0.05) { G.coins++; msg("دریک زرین یافت شد!"); }
+        }
+        if(G.dur === 0) msg("ابزار شکست!");
+        save(); render();
+    }
+
+    function doGlean() { G.end.glean = now() + CFG.glean; save(); render(); }
+    function finGlean() { G.end.glean = 0; addXP(1); if(Math.random()<0.3) { G.bread++; msg("+1 نان"); } save(); render(); }
+
+    function doRep() { G.end.rep = now() + CFG.rep; save(); render(); }
+    function finRep() { G.end.rep = 0; G.dur = 3; msg("نوسازی شد"); save(); render(); }
+
+    // توابع گله (Global شده برای دسترسی از HTML)
+    window.buyAnim = function(id) {
+        let a = CFG.animals.find(function(x){ return x.id==id; });
+        if(G.coins < a.c) { msg("دریک کافی نیست"); return; }
+        G.coins -= a.c; G.animals[id] = true; save(); renderHerd(); render();
+    };
+    window.milkAnim = function(id) {
+        let a = CFG.animals.find(function(x){ return x.id==id; });
+        if(G.bread < a.f) { msg("نان کافی نیست"); return; }
+        G.bread -= a.f; G.end[id] = now() + a.t; save(); renderHerd(); render();
+    };
+    function finMilk(id) {
+        let a = CFG.animals.find(function(x){ return x.id==id; });
+        G.end[id] = 0; G.milk += a.out; msg("شیر دوشیده شد"); save(); renderHerd(); render();
+    }
+
+    function addXP(n) {
+        G.xp += n; 
+        let th = CFG.levels[Math.min(G.lvl,8)-1];
+        if(G.xp >= th && G.lvl < 8) {
+            G.xp -= th; G.lvl++; msg("ارتقا رتبه! 🎉");
+        }
+    }
+
+    // رندر گرافیک
+    function render() {
+        el('ui-bread').innerText = G.bread;
+        el('ui-coin').innerText = G.coins;
+        el('ui-milk').innerText = Math.floor(G.milk);
+        el('ui-rank').innerText = CFG.ranks[Math.min(G.lvl,8)-1];
+        
+        let max = CFG.levels[Math.min(G.lvl,8)-1] || 9999;
+        let pct = (G.lvl>=8) ? 100 : Math.floor((G.xp/max)*100);
+        el('ui-xp').innerText = pct + "%";
+        el('bar-xp').style.width = pct + "%";
+
+        el('ui-dur').innerText = G.dur + "/3";
+        el('bar-dur').style.width = (G.dur/3)*100 + "%";
+
+        // دکمه‌ها
+        let fb = el('btn-farm');
+        if(G.end.farm > 0) { fb.classList.add('loading'); fb.disabled=true; }
+        else { fb.classList.remove('loading'); fb.disabled = G.dur<=0; }
+
+        let gb = el('btn-glean');
+        if(G.end.glean > 0) { gb.classList.add('loading'); gb.disabled=true; }
+        else { gb.classList.remove('loading'); gb.disabled=false; }
+
+        let rb = el('btn-rep');
+        if(G.end.rep > 0) { rb.classList.add('loading'); rb.disabled=true; }
+        else { rb.classList.remove('loading'); rb.disabled = G.dur>0; }
+    }
+
+    function renderHerd() {
+        let h = '';
+        CFG.animals.forEach(function(a){
+            let has = G.animals[a.id];
+            let busy = G.end[a.id] > 0;
+            let lock = G.lvl < a.lvl;
+            
+            h += '<div class="card"><h2>'+a.n+'</h2>';
+            h += '<img src="images/'+a.img+'" class="card-img" onerror="this.style.display=\'none\'">';
+            
+            if(lock) h += '<div style="color:red">نیاز به رتبه '+CFG.ranks[a.lvl-1]+'</div>';
+            else if(!has) h += '<button class="btn btn-buy" onclick="window.buyAnim(\''+a.id+'\')">خرید ('+a.c+' دریک)</button>';
+            else if(busy) h += '<button class="btn loading" disabled>درحال دوشیدن <div class="timer" id="tm-'+a.id+'"></div></button>';
+            else h += '<button class="btn" onclick="window.milkAnim(\''+a.id+'\')">دوشیدن ('+a.f+' نان)</button>';
+            h += '</div>';
+        });
+        h += '<div style="height:50px"></div>';
+        el('herd-box').innerHTML = h;
+    }
+
+    // حلقه اصلی
+    function loop() {
+        let n = now(); let u = false;
+        
+        // برکت و غارت (5 دقیقه = 300 ثانیه)
+        G.pt++;
+        if(G.pt >= 300) {
+            G.pt=0;
+            if(G.lvl<=2) { G.bread++; if(G.lvl==2) G.xp++; msg("برکت رسید"); }
+            if(Math.random() < CFG.rob[Math.min(G.lvl,8)-1]) {
+                if(G.bread>0) { G.bread--; msg("غارتگر ۱ نان دزدید!"); }
+            }
+            u=true;
+        }
+
+        // تایمرها
+        if(G.end.farm > 0) {
+            if(n >= G.end.farm) { finFarm(); u=true; }
+            else el('t-farm').innerText = fmt(G.end.farm - n);
+        }
+        if(G.end.glean > 0) {
+            if(n >= G.end.glean) { finGlean(); u=true; }
+            else el('t-glean').innerText = (G.end.glean - n)+"s";
+        }
+        if(G.end.rep > 0) {
+            if(n >= G.end.rep) { finRep(); u=true; }
+            else el('t-rep').innerText = fmt(G.end.rep - n);
+        }
+        CFG.animals.forEach(function(a){
+            if(G.end[a.id] > 0) {
+                if(n >= G.end[a.id]) { finMilk(a.id); u=true; renderHerd(); }
+                else {
+                    let e = el('tm-'+a.id);
+                    if(e) e.innerText = fmt(G.end[a.id] - n);
+                }
+            }
+        });
+
+        if(u) { save(); render(); }
+    }
+
+    // --- راه اندازی ---
+    try {
+        if(window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.setHeaderColor('#000000');
+        }
+        
+        // لود دیتا
+        let d = localStorage.getItem('PARSEH_V27_FINAL');
+        if(d) {
+            let t = JSON.parse(d);
+            G = Object.assign(G, t);
+            if(!G.animals) G.animals={};
+        }
+
+        if(G.seen) el('start-modal').style.display = 'none';
+        
+        render(); renderHerd();
+        setInterval(loop, 1000);
+
+    } catch(err) {
+        el('error-box').style.display='block';
+        el('error-box').innerText = "خطا: " + err;
+    }
+</script>
+</body>
+</html>
