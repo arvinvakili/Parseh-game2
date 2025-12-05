@@ -9,11 +9,10 @@
     <style>
         :root {
             --bg-color: #0c0c0c;
-            --stone-light: #8d6e63;
-            --stone-dark: #3e2723;
             --gold: #ffd700;
-            --glass: rgba(0, 0, 0, 0.45); /* شفافیت زیاد */
-            --nav-bg: #1a1a1a;
+            /* رنگ شیشه ثابت و سنگین برای جلوگیری از پرش */
+            --glass-solid: rgba(20, 20, 20, 0.85); 
+            --nav-bg: #111;
         }
 
         * { 
@@ -21,7 +20,7 @@
             user-select: none; 
             -webkit-tap-highlight-color: transparent; 
             outline: none;
-            touch-action: manipulation; /* حذف تاخیر کلیک در موبایل */
+            touch-action: manipulation;
         }
 
         body {
@@ -34,139 +33,148 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* حذف اسکرول کلی */
+            overflow: hidden;
         }
 
-        /* --- هدر (منابع) --- */
+        /* --- هدر --- */
         header {
-            height: 70px;
+            height: 60px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
-            z-index: 10;
+            padding: 0 15px;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            z-index: 20;
         }
 
         .resource-pill {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 215, 0, 0.3);
-            border-radius: 50px;
-            padding: 5px 15px;
+            border-radius: 8px;
+            padding: 4px 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-width: 100px;
+            gap: 8px;
+            min-width: 90px;
             justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        .resource-pill img { width: 30px; height: 30px; filter: drop-shadow(0 2px 4px #000); }
-        .resource-pill span { font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 2px #000; }
+        .resource-pill img { width: 28px; height: 28px; }
+        .resource-pill span { font-weight: bold; font-size: 1.1rem; color: #fff; }
 
-        /* --- محیط اصلی (View Container) --- */
+        /* --- محیط اصلی --- */
         #main-container {
             flex: 1;
             position: relative;
-            overflow: hidden;
             width: 100%;
+            /* حذف هرگونه انیمیشن کلی */
         }
 
-        /* صفحات مختلف (Tab Views) */
+        /* صفحات (بدون انیمیشن فید) */
         .view-section {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            display: none; /* پیش فرض مخفی */
+            /* استفاده از visibility برای پرفورمنس بهتر */
+            visibility: hidden; 
+            opacity: 0;
+            display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* مرکز چین مثل کلش رویال */
+            justify-content: center;
             padding: 20px;
-            animation: fadeIn 0.3s ease;
+            /* انتقال آنی */
+            transition: none; 
         }
-        .view-section.active { display: flex; }
+        
+        .view-section.active { 
+            visibility: visible; 
+            opacity: 1;
+        }
 
-        @keyframes fadeIn { from {opacity: 0; transform: scale(0.98);} to {opacity: 1; transform: scale(1);} }
-
-        /* --- کارت‌های شفاف --- */
+        /* --- کارت شیشه‌ای پایدار --- */
         .glass-card {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 20px;
-            padding: 25px;
+            /* استفاده از رنگ سالیدتر برای جلوگیری از مات شدن ناگهانی */
+            background: var(--glass-solid);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
             width: 100%;
-            max-width: 350px;
+            max-width: 340px;
             text-align: center;
-            backdrop-filter: blur(10px); /* تاری شیشه‌ای حرفه‌ای */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* بِلِر (Blur) ثابت */
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
 
-        .glass-card h2 { margin: 0 0 20px 0; color: var(--gold); text-shadow: 0 2px 4px #000; font-size: 1.8rem; }
-        .main-icon { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.8)); margin-bottom: 20px; }
+        .glass-card h2 { margin: 0 0 15px 0; color: var(--gold); font-size: 1.5rem; text-shadow: 0 2px 2px #000; }
+        .main-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); }
 
         /* نوار وضعیت */
-        .bar-container { width: 100%; height: 12px; background: rgba(0,0,0,0.6); border-radius: 6px; margin: 10px 0; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff8f00, #ffca28); width: 100%; transition: width 0.3s; }
+        .bar-container { width: 100%; height: 10px; background: rgba(0,0,0,0.8); border-radius: 5px; margin: 10px 0; border: 1px solid #333; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #ff8f00, #ffca28); width: 100%; }
 
-        /* --- دکمه سنگی کتیبه‌ای (Ancient Stone Button) --- */
+        /* --- دکمه سنگی (بهبود یافته) --- */
         .stone-btn {
             width: 100%;
-            padding: 20px;
+            padding: 18px;
             margin-top: 15px;
-            background-color: #5d4037; /* رنگ گل/سنگ */
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.1'/%3E%3C/svg%3E");
+            background-color: #4e342e;
+            /* پترن نویز برای حس سنگ */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.15'/%3E%3C/svg%3E");
             
             border: none;
-            border-radius: 12px;
-            
-            /* افکت سه بعدی سنگی */
-            box-shadow: 
-                inset 0 2px 0 rgba(255,255,255,0.3), /* نور بالا */
-                inset 0 -4px 0 rgba(0,0,0,0.5),      /* سایه پایین */
-                0 6px 0 #3e2723,                     /* ضخامت سنگ */
-                0 15px 20px rgba(0,0,0,0.6);         /* سایه روی زمین */
-            
-            color: #ffecb3;
+            border-radius: 10px;
+            color: #ffe082;
             font-family: serif;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: bold;
-            text-shadow: 0 -1px 1px rgba(0,0,0,0.8); /* حکاکی متن */
+            text-shadow: 0 -1px 1px rgba(0,0,0,0.8);
             cursor: pointer;
             position: relative;
-            transition: all 0.1s;
+            
+            /* سایه سنگی و عمق */
+            box-shadow: 
+                inset 0 1px 0 rgba(255,255,255,0.2),
+                0 4px 0 #271c19,
+                0 10px 10px rgba(0,0,0,0.5);
+            
+            transform: translateY(0);
+            transition: transform 0.05s, box-shadow 0.05s; /* بسیار سریع */
         }
 
         .stone-btn:active {
-            transform: translateY(6px); /* فرو رفتن دکمه */
+            transform: translateY(4px);
             box-shadow: 
-                inset 0 2px 0 rgba(255,255,255,0.1), 
-                inset 0 -1px 0 rgba(0,0,0,0.5), 
-                0 0 0 #3e2723, 
-                0 2px 5px rgba(0,0,0,0.6);
+                inset 0 1px 0 rgba(255,255,255,0.1),
+                0 0 0 #271c19,
+                0 2px 2px rgba(0,0,0,0.5);
         }
 
         .stone-btn:disabled {
-            background-color: #424242;
-            color: #757575;
-            box-shadow: 0 6px 0 #212121;
+            background-color: #333;
+            color: #666;
+            box-shadow: 0 4px 0 #111;
             filter: grayscale(1);
         }
 
-        /* تایمر روی دکمه */
+        /* تایمر */
         .timer-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); border-radius: 12px;
+            background: rgba(0,0,0,0.8); border-radius: 10px;
             display: none; align-items: center; justify-content: center;
-            color: var(--gold); font-size: 1.5rem; text-shadow: none;
+            color: var(--gold); font-size: 1.4rem;
         }
         .stone-btn.loading .timer-overlay { display: flex; }
 
-        /* --- منوی پایین (Bottom Navigation) --- */
+        /* --- نوار منو پایین --- */
         .nav-bar {
-            height: 80px;
-            background: #151515;
+            height: 70px;
+            background: #111;
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr; /* سه ستون برابر */
-            border-top: 3px solid #3e2723;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
-            z-index: 20;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-top: 2px solid #3e2723;
+            z-index: 30;
         }
 
         .nav-item {
@@ -174,36 +182,33 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #757575;
+            color: #666;
             cursor: pointer;
-            transition: all 0.2s;
             position: relative;
         }
 
         .nav-item.active {
             color: var(--gold);
-            background: linear-gradient(180deg, rgba(255, 215, 0, 0.1) 0%, transparent 100%);
+            background: rgba(255, 215, 0, 0.05);
         }
         
-        /* نشانگر فعال بودن تب */
         .nav-item.active::after {
-            content: ''; position: absolute; top: 0; width: 60%; height: 3px;
-            background: var(--gold); box-shadow: 0 0 10px var(--gold);
-            border-radius: 0 0 5px 5px;
+            content: ''; position: absolute; top: 0; width: 50%; height: 3px;
+            background: var(--gold); box-shadow: 0 0 8px var(--gold);
         }
 
-        .nav-icon { font-size: 1.8rem; margin-bottom: 5px; filter: drop-shadow(0 2px 2px #000); }
+        .nav-icon { font-size: 1.6rem; margin-bottom: 4px; }
         .nav-text { font-size: 0.8rem; font-weight: bold; }
 
-        /* --- پیام‌ها (Toast) --- */
+        /* --- توست (پیام) --- */
         #toast {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            background: rgba(20, 20, 20, 0.95); border: 1px solid var(--gold);
-            color: var(--gold); padding: 12px 30px; border-radius: 8px;
-            font-size: 1rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
-            white-space: nowrap; box-shadow: 0 0 20px rgba(0,0,0,1);
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+            background: #222; border: 1px solid var(--gold);
+            color: var(--gold); padding: 10px 25px; border-radius: 6px;
+            font-size: 0.9rem; opacity: 0; transition: opacity 0.2s; pointer-events: none; z-index: 100;
+            white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.8);
         }
-        #toast.show { opacity: 1; bottom: 110px; }
+        #toast.show { opacity: 1; bottom: 100px; }
 
     </style>
 </head>
@@ -225,11 +230,11 @@
     <div class="view-section active" id="view-farm">
         <div class="glass-card">
             <h2>زمین‌های برزیگری</h2>
-            <div style="height: 130px; display:flex; justify-content:center; align-items:center;">
+            <div style="height: 110px; display:flex; justify-content:center; align-items:center;">
                 <img src="images/shovel.png" class="main-icon" onerror="this.style.display='none'">
             </div>
             
-            <div style="display:flex; justify-content:space-between; color:#bbb; font-size:0.9rem;">
+            <div style="display:flex; justify-content:space-between; color:#bbb; font-size:0.8rem;">
                 <span>توان بیل</span>
                 <span id="durabilityText">3 / 3</span>
             </div>
@@ -247,10 +252,10 @@
     <div class="view-section" id="view-smith">
         <div class="glass-card">
             <h2>آهنگرسرای کاوه</h2>
-            <div style="height: 130px; display:flex; justify-content:center; align-items:center;">
+            <div style="height: 110px; display:flex; justify-content:center; align-items:center;">
                 <img src="images/repair.png" class="main-icon" onerror="this.style.display='none'">
             </div>
-            <p style="color:#aaa; font-size:0.9rem; margin-bottom: 20px;">وقتی ابزار شکست، اینجا بازسازی کن</p>
+            <p style="color:#888; font-size:0.8rem; margin-bottom: 20px;">تعمیر ابزار شکسته</p>
             <button id="repairBtn" class="stone-btn" onclick="startRepair()" disabled>
                 بازسازی ابزار
                 <div class="timer-overlay" id="repairTimer">00:00</div>
@@ -260,69 +265,90 @@
 
     <div class="view-section" id="view-tribe">
         </div>
-
 </div>
 
 <nav class="nav-bar">
     <div class="nav-item active" onclick="switchTab('view-farm', this)">
         <div class="nav-icon">🌾</div>
-        <div class="nav-text">کشت و کار</div>
+        <div class="nav-text">کشت</div>
     </div>
-
     <div class="nav-item" onclick="switchTab('view-smith', this)">
         <div class="nav-icon">🔨</div>
-        <div class="nav-text">آهنگرسرا</div>
+        <div class="nav-text">آهنگری</div>
     </div>
-
     <div class="nav-item" onclick="handleTribeClick(this)">
         <div class="nav-icon">🛡️</div>
         <div class="nav-text">قبیله</div>
     </div>
 </nav>
 
-<div id="toast">پیام سیستم</div>
+<div id="toast">پیام</div>
 
 <script>
+    // تنظیمات بازی
     const CONFIG = { farmTime: 5, repairTime: 10, maxDurability: 3, daricChance: 0.05 };
+    
+    // کلید ذخیره‌سازی ثابت (دیگر هرگز عوض نمی‌شود)
+    const SAVE_KEY = 'PARSEH_ETERNAL_SAVE';
+
     let state = { bread: 0, daric: 0, durability: 3, farmEnd: 0, repairEnd: 0 };
 
     window.onload = function() {
         if(window.Telegram && window.Telegram.WebApp) { 
             window.Telegram.WebApp.expand(); 
-            window.Telegram.WebApp.setHeaderColor('#0c0c0c');
+            window.Telegram.WebApp.setHeaderColor('#000000'); 
+            window.Telegram.WebApp.setBackgroundColor('#000000');
         }
         
-        const saved = localStorage.getItem('parseh_v6_royal');
-        if (saved) try { state = JSON.parse(saved); } catch(e) {}
-        
-        render(); setInterval(gameLoop, 1000);
+        loadGame();
+        render(); 
+        setInterval(gameLoop, 1000);
     };
 
-    // --- سیستم نویگیشن (منو) ---
+    function loadGame() {
+        const saved = localStorage.getItem(SAVE_KEY);
+        if (saved) {
+            try {
+                let temp = JSON.parse(saved);
+                // ادغام اطلاعات (اگر فیلد جدیدی اضافه شود، دیتای قدیم خراب نمیشود)
+                state = { ...state, ...temp };
+            } catch(e) { console.error("Save corrupted"); }
+        } else {
+            // تلاش برای بازیابی از نسخه‌های قبلی (فقط یکبار)
+            const oldSave = localStorage.getItem('parseh_v6_royal');
+            if (oldSave) {
+                try {
+                    state = JSON.parse(oldSave);
+                    save(); // انتقال به سیستم جدید
+                } catch(e) {}
+            }
+        }
+    }
+
+    function save() { 
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state)); 
+    }
+
+    // --- نویگیشن بدون انیمیشن (آنی) ---
     function switchTab(viewId, navElem) {
-        // تغییر ویو
+        // تغییر کلاس active
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         document.getElementById(viewId).classList.add('active');
 
-        // تغییر استایل منو
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         navElem.classList.add('active');
         
-        // ویبره برای حس کلیک
         if(navigator.vibrate) navigator.vibrate(10);
     }
 
     function handleTribeClick(navElem) {
-        // این تابع ویو را عوض نمیکند، فقط پیام میدهد
-        showToast("⏳ این بخش به زودی باز می‌شود...", 3550);
-        if(navigator.vibrate) navigator.vibrate(50);
+        showToast("⏳ به زودی...", 3550);
+        if(navigator.vibrate) navigator.vibrate(30);
     }
 
     // --- منطق بازی ---
-    function save() { localStorage.setItem('parseh_v6_royal', JSON.stringify(state)); }
-
     function startFarming() {
-        if (state.durability <= 0) { showToast("ابزار شکسته است! به آهنگرسرا بروید."); return; }
+        if (state.durability <= 0) { showToast("ابزار شکسته است!"); return; }
         state.farmEnd = Math.floor(Date.now()/1000) + CONFIG.farmTime;
         save(); render();
     }
@@ -330,47 +356,6 @@
     function claimFarming() {
         state.farmEnd = 0; state.bread += 2; state.durability--;
         let msg = "برداشت شد: +2 نان";
-        if (Math.random() < CONFIG.daricChance) { state.daric++; msg = "گنج یافت شد: +1 دریک!"; }
-        if (state.durability === 0) msg += " (ابزار شکست)";
-        showToast(msg); save(); render();
-    }
-
-    function startRepair() {
-        state.repairEnd = Math.floor(Date.now()/1000) + CONFIG.repairTime;
-        save(); render();
-    }
-
-    function claimRepair() {
-        state.repairEnd = 0; state.durability = CONFIG.maxDurability;
-        showToast("بیل بازسازی شد."); save(); render();
-    }
-
-    function showToast(text, duration = 2000) {
-        const toast = document.getElementById('toast'); 
-        toast.innerText = text; 
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, duration);
-    }
-
-    function gameLoop() {
-        const now = Math.floor(Date.now()/1000); let changed = false;
-        if (state.farmEnd > 0) { if (now >= state.farmEnd) { claimFarming(); changed = true; } else updateTimer('farmTimer', state.farmEnd - now); }
-        if (state.repairEnd > 0) { if (now >= state.repairEnd) { claimRepair(); changed = true; } else updateTimer('repairTimer', state.repairEnd - now); }
-        if(changed) render();
-    }
-
-    function updateTimer(id, sec) { document.getElementById(id).innerText = sec + " ثانیه"; }
-
-    function render() {
-        document.getElementById('breadDisplay').innerText = state.bread;
-        document.getElementById('daricDisplay').innerText = state.daric;
-        document.getElementById('durabilityText').innerText = `${state.durability} / ${CONFIG.maxDurability}`;
-        document.getElementById('durabilityBar').style.width = (state.durability / CONFIG.maxDurability) * 100 + '%';
-        
-        const farmBtn = document.getElementById('farmBtn'); const repairBtn = document.getElementById('repairBtn');
-        if(state.farmEnd > 0) { farmBtn.classList.add('loading'); farmBtn.disabled = true; } else { farmBtn.classList.remove('loading'); farmBtn.disabled = (state.durability <= 0); }
-        if(state.repairEnd > 0) { repairBtn.classList.add('loading'); repairBtn.disabled = true; } else { repairBtn.classList.remove('loading'); repairBtn.disabled = (state.durability > 0); }
-    }
-</script>
-</body>
-</html>
+        if (Math.random() < CONFIG.daricChance) { state.daric++; msg = "دریک زرین یافت شد!"; }
+        if (state.durability === 0) msg += " (بیل شکست)";
+        showToast(msg); save
