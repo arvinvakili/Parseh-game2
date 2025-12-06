@@ -7,9 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* استایل‌های پایه */
-        :root { --bg: #050505; --gold: #ffc107; --panel: rgba(30,30,30,0.95); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
+        /* استایل‌ها */
+        :root { --bg: #050505; --gold: #ffc107; --glass: rgba(20,20,20,0.95); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
         
         body {
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
@@ -17,23 +17,188 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* صفحه خطا (فقط اگر جاوااسکریپت نترکد دیده میشود) */
-        #error-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 99999;
-            color: red; padding: 20px; text-align: center; font-size: 14px;
+        /* نوار تست سیستم (برای اطمینان از کارکرد) */
+        #sys-check {
+            position: fixed; top: 0; left: 0; width: 100%; height: 20px;
+            background: #333; color: yellow; font-size: 10px; z-index: 999999;
+            text-align: center; line-height: 20px;
         }
 
-        /* --- مودال شروع --- */
-        #start-modal {
+        /* مودال شروع */
+        #start-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
-        .modal-box {
-            border: 2px solid var(--gold); padding: 30px; border-radius: 20px;
-            text-align: center; width: 85%; max-width: 350px; background: #111;
+        .start-box {
+            border: 2px solid var(--gold); padding: 40px; border-radius: 30px; background: #111;
+            text-align: center; width: 85%; max-width: 400px;
         }
-        .big-start-btn {
-            background: var(--gold); color: #000; border: none; padding: 15px 50px;
+        .start-btn {
+            width: 100%; padding: 20px; font-size: 1.5rem; font-weight: bold;
+            background: var(--gold); border: none; border-radius: 50px; margin-top: 20px;
+            cursor: pointer; box-shadow: 0 0 20px var(--gold);
+        }
+
+        /* هدر */
+        header { height: 130px; background: rgba(0,0,0,0.8); padding: 10px; display: flex; flex-direction: column; justify-content: center; margin-top: 20px;}
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; }
+        
+        .pill { background: #333; border: 1px solid #555; border-radius: 12px; padding: 5px 10px; display: flex; align-items: center; gap: 5px; min-width: 80px; }
+        .pill img { width: 35px; height: 35px; }
+        .pill span { font-size: 1.2rem; font-weight: bold; }
+
+        /* بدنه */
+        #game-area { flex: 1; position: relative; width: 100%; }
+        .page { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; }
+        .page.active { display: flex; }
+
+        /* کارت */
+        .card {
+            background: var(--glass); border: 2px solid #3e2723; border-radius: 20px;
+            padding: 20px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px;
+        }
+        .card img { width: 180px; height: 180px; object-fit: contain; margin: 10px auto; display: block; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); }
+
+        /* دکمه‌ها */
+        button.action-btn {
+            width: 100%; padding: 20px; margin-top: 15px; border-radius: 15px; border: none;
+            font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative;
+            background: #3e2723; color: var(--gold); border: 1px solid #5d4037;
+            box-shadow: 0 5px 0 #1b0000;
+        }
+        button.action-btn:active { transform: translateY(4px); box-shadow: none; }
+        button.action-btn:disabled { background: #222; color: #555; transform: none; box-shadow: none; }
+        
+        .timer-text { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 15px; display: none; align-items: center; justify-content: center; color: var(--gold); }
+        button.loading .timer-text { display: flex; }
+
+        /* نوار پایین */
+        nav { height: 90px; background: #111; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #333; z-index: 100; }
+        .nav-item { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .nav-item.active { color: var(--gold); background: #222; border-top: 4px solid var(--gold); }
+        .nav-icon { font-size: 2rem; }
+
+        #toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 15px 30px; border-radius: 10px; display: none; z-index: 20000; }
+    </style>
+</head>
+<body>
+
+    <div id="sys-check">در حال بارگذاری موتور بازی...</div>
+
+    <div id="start-overlay">
+        <div class="start-box">
+            <h1 style="color:var(--gold)">امپراطوری پارسه</h1>
+            <p style="color:#ccc; margin-top:20px;">خوش آمدید</p>
+            <button id="btn-enter" class="start-btn">ورود</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="row">
+            <div class="pill"><img src="images/bread.png" onerror="this.style.display='none'"> <span id="v-bread">0</span></div>
+            <div style="color:var(--gold); font-size:1.4rem; font-weight:bold;" id="v-rank">برزیگر</div>
+            <div class="pill"><span id="v-coin">0</span> <img src="images/daric.png" onerror="this.style.display='none'"></div>
+        </div>
+        <div style="text-align:center; color:#aaa; margin-top:10px;">
+            شیر: <span id="v-milk" style="color:#fff; font-weight:bold;">0</span> | پیشرفت: <span id="v-xp" style="color:#00e5ff">0%</span>
+        </div>
+        <div style="width:100%; height:8px; background:#222; margin-top:5px; border-radius:4px;"><div id="bar-xp" style="width:0%; height:100%; background:#00e5ff;"></div></div>
+    </header>
+
+    <div id="game-area">
+        <div id="page-1" class="page active">
+            <div class="card">
+                <h2>کشتزار</h2>
+                <img src="images/shovel.png" onerror="this.style.display='none'">
+                <div style="display:flex; justify-content:space-between; color:#aaa;"><span>توان</span> <span id="v-dur">3/3</span></div>
+                <div style="width:100%; height:8px; background:#000; margin-bottom:10px;"><div id="bar-dur" style="width:100%; height:100%; background:orange;"></div></div>
+                
+                <button id="btn-farm" class="action-btn">کشت (۳۵ دقیقه) <div class="timer-text" id="t-farm"></div></button>
+                <button id="btn-glean" class="action-btn" style="background:#004d40; color:#fff">خوشه‌چینی (سریع) <div class="timer-text" id="t-glean"></div></button>
+            </div>
+        </div>
+
+        <div id="page-2" class="page">
+            <div class="card">
+                <h2>آهنگرسرا</h2>
+                <img src="images/repair.png" onerror="this.style.display='none'">
+                <button id="btn-rep" class="action-btn">بازسازی <div class="timer-text" id="t-rep"></div></button>
+            </div>
+        </div>
+
+        <div id="page-3" class="page">
+            <div id="herd-box"></div>
+        </div>
+
+        <div id="page-4" class="page">
+            <div class="card"><p>به زودی...</p></div>
+        </div>
+    </div>
+
+    <nav>
+        <button id="nav-1" class="nav-item active"><span class="nav-icon">🌾</span>کشت</button>
+        <button id="nav-2" class="nav-item"><span class="nav-icon">🔨</span>آهنگری</button>
+        <button id="nav-3" class="nav-item"><span class="nav-icon">🐏</span>گله</button>
+        <button id="nav-4" class="nav-item"><span class="nav-icon">🛡️</span>خاندان</button>
+    </nav>
+
+    <div id="toast">پیام</div>
+
+<script>
+    // --- تمام کدها داخل این بلوک امن هستند ---
+    (function() {
+        // متغیرهای سیستمی
+        var sys = document.getElementById('sys-check');
+        
+        try {
+            // تنظیمات
+            var T_M = 60; // 1 دقیقه
+            var CFG = {
+                farm: 35*T_M, glean: 3, rep: 15*T_M, 
+                animals: [
+                    {id:'cow', n:'گاو', c:55, f:5, t:20*T_M, out:3, img:'cow.png', lvl:2},
+                    {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', lvl:3},
+                    {id:'goat', n:'بز', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', lvl:5}
+                ],
+                ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
+                levels: [100,200,330,440,555,710,1000,99999],
+                rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
+            };
+
+            var G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0, glean:0, rep:0}, animals:{}, seen:false, pt:0 };
+
+            // المان‌ها
+            var el = function(id){ return document.getElementById(id); };
+            
+            // بارگذاری
+            var load = function() {
+                var d = localStorage.getItem('PARSEH_V34_FINAL');
+                if(d) {
+                    var t = JSON.parse(d);
+                    G = Object.assign(G, t);
+                    if(!G.animals) G.animals={};
+                }
+            };
+            var save = function() { localStorage.setItem('PARSEH_V34_FINAL', JSON.stringify(G)); };
+            var now = function() { return Math.floor(Date.now()/1000); };
+            var msg = function(txt) {
+                var t = el('toast'); t.innerText=txt; t.style.display='block';
+                setTimeout(function(){t.style.display='none'}, 3000);
+            };
+
+            // منطق
+            var render = function() {
+                el('v-bread').innerText = G.bread;
+                el('v-coin').innerText = G.coins;
+                el('v-milk').innerText = Math.floor(G.milk);
+                el('v-rank').innerText = CFG.ranks[Math.min(G.lvl,8)-1];
+                
+                var req = CFG.levels[Math.min(G.lvl,8)-1];
+                var pct = (G.lvl>=8) ? 100 : Math.floor((G.xp/req)*100);
+                el('v-xp').innerText = pct + "%";
+                el('bar-xp').style.width = pct + "%";
+
+                el('v-
             font-size: 1.4rem; font-weight: bold; border-radius: 50px; margin-top: 25px;
             cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%;
         }
@@ -508,4 +673,5 @@
                 h += '<img src="images/'+a.img+'" onerror="this.style.display=\'none\'">';
                 
                 if(lock) h += '<div style="color:red">قفل (رتبه '+CFG.ranks
+
 
