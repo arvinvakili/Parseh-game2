@@ -7,34 +7,187 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* استایل‌های پایه */
         :root { --bg: #050505; --gold: #ffc107; --panel: rgba(30,30,30,0.98); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         
         body {
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
+            background-size: cover;
             color: #fff; font-family: 'Tahoma', serif; margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- مودال شروع (همیشه نمایان - بدون نیاز به JS برای نمایش) --- */
-        #start-overlay {
+        /* مودال شروع */
+        #start-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
         .modal-box {
             border: 2px solid var(--gold); padding: 30px; border-radius: 20px;
             text-align: center; width: 85%; max-width: 350px; background: #111;
-            box-shadow: 0 0 50px rgba(255, 193, 7, 0.4);
         }
-        /* دکمه شروع */
         .start-btn {
-            background: var(--gold); color: #000; border: none; padding: 20px 50px;
+            background: var(--gold); color: #000; border: none; padding: 15px 50px;
             font-size: 1.4rem; font-weight: bold; border-radius: 50px; margin-top: 25px;
-            cursor: pointer; box-shadow: 0 0 20px var(--gold); display: block; width: 100%;
+            cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%;
         }
 
-        /* --- هدر --- */
+        header { 
+            height: 130px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
+            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
+        }
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
+        
+        .pill { 
+            background: rgba(60,60,60,0.8); border: 1px solid #555; border-radius: 12px; 
+            padding: 5px 15px; display: flex; align-items: center; gap: 10px; min-width: 90px; 
+        }
+        .pill img { width: 35px; height: 35px; object-fit: contain; }
+        .pill span { font-weight: bold; font-size: 1.2rem; }
+        
+        .alt-emoji { display: none; font-size: 1.5rem; }
+        .rank-title { font-size: 1.3rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 5px var(--gold); }
+
+        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
+        .xp-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #00b09b, #96c93d); width: 0%; transition: width 0.4s; }
+
+        #game-area { flex: 1; position: relative; width: 100%; }
+        
+        .tab-view { 
+            position: absolute; inset: 0; opacity: 0; visibility: hidden; 
+            transition: opacity 0.3s; display: flex; flex-direction: column; 
+            align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
+        }
+        .tab-view.active-tab { opacity: 1; visibility: visible; }
+
+        .card { background: var(--panel); border: 2px solid #3e2723; border-radius: 20px; padding: 20px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px #000; }
+        .img-box { width: 200px; height: 200px; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.1), transparent 70%); border-radius: 50%; }
+        .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(1.1); }
+        .big-emoji { font-size: 6rem; display: none; filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
+
+        .btn { width: 100%; padding: 20px; margin-top: 15px; border-radius: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; position: relative; border-radius: 15px; }
+        .btn-act { background: #3e2723; color: var(--gold); border: 2px solid #5d4037; box-shadow: 0 5px 0 #1b0000; }
+        .btn-act:active { transform: translateY(4px); box-shadow: 0 1px 0 #1b0000; }
+        .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: none; cursor: default; }
+        
+        .btn-glean { background: #004d40; color: #fff; box-shadow: 0 5px 0 #00251a; }
+        .btn-buy { background: #1b5e20; color: #fff; }
+
+        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 12px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.4rem; }
+        .btn.loading .timer { display: flex; }
+
+        nav { height: 90px; background: #0a0a0a; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid #333; z-index: 50; }
+        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; padding: 10px; }
+        .nav-btn.active { color: var(--gold); background: #222; border-top: 3px solid var(--gold); }
+        .icon { font-size: 1.8rem; margin-bottom: 3px; }
+
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 10px; display: none; z-index: 20000; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+    <div id="start-modal">
+        <div class="modal-box">
+            <img src="images/shovel.png" style="width:100px;margin-bottom:15px;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <div style="font-size:5rem;display:none;margin-bottom:15px;">🏛️</div>
+            
+            <h1 style="color:var(--gold);font-size:2rem;margin-bottom:15px;">امپراطوری پارسه</h1>
+            <p style="color:#ccc;font-size:1.1rem;line-height:1.6;margin-bottom:15px;">
+                به داستان امپراطوری بپیوندید...<br>
+                تاریخ در انتظار شماست.
+            </p>
+            <button id="btn-enter" class="start-btn">ورود به داستان</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="row">
+            <div class="pill">
+                <img src="images/bread.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                <span class="alt-emoji">🍞</span>
+                <span id="v-bread">0</span>
+            </div>
+            
+            <div class="rank-title" id="v-rank">برزیگر</div>
+            
+            <div class="pill">
+                <span id="v-coin">0</span>
+                <img src="images/daric.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                <span class="alt-emoji">💰</span>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:5px;font-size:0.8rem;color:#aaa;">
+            شیر: <span id="v-milk" style="color:#fff;font-weight:bold;">0</span> | پیشرفت: <span id="v-xp">0%</span>
+        </div>
+        <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="bar-xp"></div></div></div>
+    </header>
+
+    <div id="game-area">
+        <div id="view-farm" class="tab-view active-tab">
+            <div class="card">
+                <h2>کشتزارهای پارس</h2>
+                <div class="img-box">
+                    <img src="images/shovel.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div class="big-emoji">🌾</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#aaa;font-size:0.8rem;">
+                    <span>توان</span> <span id="v-dur">3/3</span>
+                </div>
+                <div style="width:100%;height:8px;background:#000;border-radius:4px;"><div id="bar-dur" style="width:100%;height:100%;background:orange;"></div></div>
+                
+                <button id="btn-farm" class="btn btn-act">
+                    کشت (۳۵ دقیقه)
+                    <div class="timer" id="t-farm">00:00</div>
+                </button>
+                <button id="btn-glean" class="btn btn-glean">
+                    خوشه‌چینی (سریع)
+                    <div class="timer" id="t-glean">00:00</div>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-smith" class="tab-view">
+            <div class="card">
+                <h2>آهنگرسرا</h2>
+                <div class="img-box">
+                    <img src="images/repair.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div class="big-emoji">🔥</div>
+                </div>
+                <p style="color:#aaa;">بازسازی ابزار</p>
+                <button id="btn-rep" class="btn btn-act">
+                    بازسازی (۱۵ دقیقه)
+                    <div class="timer" id="t-rep">00:00</div>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-herd" class="tab-view">
+            <div id="herd-box" style="width:100%"></div>
+        </div>
+
+        <div id="view-tribe" class="tab-view">
+            <div class="card"><h2>خاندان‌ها</h2><div class="img-box"><div style="font-size:6rem;">🛡️</div></div><p>به زودی...</p></div>
+        </div>
+    </div>
+
+    <nav>
+        <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span><br>کشت</button>
+        <button id="nav-2" class="nav-btn"><span class="icon">🔨</span><br>آهنگری</button>
+        <button id="nav-3" class="nav-btn"><span class="icon">🐏</span><br>گله</button>
+        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span><br>خاندان</button>
+    </nav>
+
+    <div id="toast">پیام</div>
+
+<script>
+    const T_M = 60; 
+    const SAVE_KEY = 'PARSEH_V42_FIXED';
+
+    const CFG = {
+        farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
+        animals: [
+            {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3,        /* --- هدر --- */
         header { 
             height: 130px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
             padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
@@ -981,6 +1134,7 @@
         var a = CFG.animals.find(function(x){return x.id==id});
         if(G.coins < a.c) return msg("دریک کافی نیست");
         G.coins -= a.c
+
 
 
 
