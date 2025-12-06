@@ -1,40 +1,104 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>امپراطوری پارسه</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+/* مودال شروع با افکت سریع و روان */
+#start-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 10000;
+  opacity: 1; transition: opacity 0.3s ease;
+  will-change: opacity;
+  backdrop-filter: none; /* حذف فیلتر سنگین */
+}
+#start-modal.hide {
+  opacity: 0; pointer-events: none;
+}
+.modal-box {
+  background: #111; border: 2px solid rgba(255,215,0,0.5);
+  border-radius: 25px; padding: 40px; width:85%; max-width:350px;
+  text-align:center; 
+  transform: translateY(10px) scale(0.97) translateZ(0);
+  opacity: 0;
+  animation: fadePop 0.4s ease-out forwards;
+}
+@keyframes fadePop {
+  to { transform: translateY(0) scale(1) translateZ(0); opacity: 1; }
+}
 
-    <style>
-        /* --- تنظیمات اصلی --- */
-        :root { 
-            --bg: #050505; 
-            --gold: #ffc107; 
-            --glass: rgba(30, 30, 30, 0.85); 
-            --glass-border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
-        
-        body {
-            background: #000 url('images/bg.png') center/cover no-repeat fixed;
-            color: #fff; font-family: 'Tahoma', serif; margin: 0; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
-        }
+/* دکمه ورود (کوچک ولی درخشان و روان) */
+#btn-enter {
+  width: 100%; padding: 16px 0; border: none;
+  font-size: 1.4rem; font-weight: bold;
+  border-radius: 40px; color: #000;
+  background: linear-gradient(90deg, #ffca28, #ff8f00);
+  box-shadow: 0 0 15px rgba(255,193,7,0.4);
+  transition: transform 0.15s ease, box-shadow 0.3s ease;
+  will-change: transform;
+}
+#btn-enter:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,193,7,0.8); }
+#btn-enter:active { transform: scale(0.96); }
 
-        /* --- مودال شروع (با انیمیشن جدید) --- */
-        #start-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            /* انیمیشن ورود */
-            animation: fadeIn 0.8s ease forwards;
-        }
-        
-        .modal-box {
-            border: 2px solid var(--gold); padding: 40px; border-radius: 30px;
-            text-align: center; width: 85%; max-width: 350px; 
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+/* توست ساده‌تر و سبک‌تر */
+#toast {
+  position: fixed; bottom: 110px; left: 50%;
+  transform: translateX(-50%) translateY(15px);
+  padding: 12px 24px; border-radius: 12px;
+  background: rgba(20,20,20,0.95);
+  border: 1px solid rgba(255,215,0,0.3);
+  color: var(--gold); font-size: 1rem;
+  opacity: 0; transition: opacity 0.25s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* تعویض تب فوق‌العاده نرم ولی کم‌هزینه */
+.tab-view {
+  opacity: 0; transform: translateY(10px) translateZ(0);
+  transition: opacity 0.3s linear, transform 0.3s ease-out;
+  display: none;
+}
+.tab-view.active-tab {
+  display: flex; opacity: 1; transform: translateY(0) translateZ(0);
+}
+
+/* حرکت خط ناوبری نرم ولی سبک */
+#nav-indicator {
+  transition: left 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+</style>
+
+<script>
+// رفع تأخیر واکنش تاچ در موبایل
+document.addEventListener('touchstart',()=>{}, {passive:true});
+
+function el(id){return document.getElementById(id);}
+function vibrate(type='light'){ try{ if(navigator.vibrate) navigator.vibrate(10);}catch(e){} }
+
+function msg(txt){
+  const t=el('toast');
+  t.innerText=txt; t.classList.add('show');
+  vibrate();
+  clearTimeout(t._h);
+  t._h=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  const enterBtn = el('btn-enter');
+  const modal = el('start-modal');
+
+  // مهم: pointer-events در حالت قابل مشاهده فعال
+  modal.style.pointerEvents='auto';
+  enterBtn.addEventListener('click', ()=>{
+    vibrate('medium');
+    modal.classList.add('hide');
+    setTimeout(()=>{
+      modal.style.display='none';
+      msg('به امپراطوری خوش آمدی 👑');
+      G.seen=true; save();
+    },300);
+  });
+
+  // باقیمانده منطق قبلی...
+});
+</script>            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
             box-shadow: 0 0 60px rgba(255, 193, 7, 0.3);
             /* انیمیشن پاپ */
             transform: scale(0.95); opacity: 0;
@@ -2173,6 +2237,7 @@
     </script>
 </body>
 </html>
+
 
 
 
