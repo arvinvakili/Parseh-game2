@@ -1,72 +1,202 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>امپراطوری پارسه</title>
 <style>
-/* مودال شروع با افکت سریع و روان */
+:root {
+  --gold: #FFD54F;
+  --glass: rgba(20,20,20,0.8);
+  --glass-border: 1px solid rgba(255,215,0,0.3);
+}
+
+/* مودال شروع */
 #start-modal {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.9);
   display: flex; justify-content: center; align-items: center;
-  z-index: 10000;
-  opacity: 1; transition: opacity 0.3s ease;
-  will-change: opacity;
-  backdrop-filter: none; /* حذف فیلتر سنگین */
+  z-index: 10000; transition: opacity 0.3s ease;
 }
-#start-modal.hide {
-  opacity: 0; pointer-events: none;
-}
+#start-modal.hide {opacity: 0; pointer-events: none;}
 .modal-box {
   background: #111; border: 2px solid rgba(255,215,0,0.5);
-  border-radius: 25px; padding: 40px; width:85%; max-width:350px;
-  text-align:center; 
-  transform: translateY(10px) scale(0.97) translateZ(0);
-  opacity: 0;
-  animation: fadePop 0.4s ease-out forwards;
+  border-radius: 25px; padding: 40px; max-width: 350px;
+  text-align: center; animation: popIn 0.4s ease-out forwards;
 }
-@keyframes fadePop {
-  to { transform: translateY(0) scale(1) translateZ(0); opacity: 1; }
-}
+@keyframes popIn {0%{transform:scale(0.9);opacity:0;}100%{transform:scale(1);opacity:1;}}
 
-/* دکمه ورود (کوچک ولی درخشان و روان) */
+/* دکمه ورود */
 #btn-enter {
-  width: 100%; padding: 16px 0; border: none;
-  font-size: 1.4rem; font-weight: bold;
-  border-radius: 40px; color: #000;
-  background: linear-gradient(90deg, #ffca28, #ff8f00);
-  box-shadow: 0 0 15px rgba(255,193,7,0.4);
-  transition: transform 0.15s ease, box-shadow 0.3s ease;
-  will-change: transform;
+  width:100%;padding:16px 0;border:none;
+  font-size:1.3rem;font-weight:bold;border-radius:40px;color:#000;
+  background:linear-gradient(90deg,#ffca28,#ff8f00);
+  box-shadow:0 0 15px rgba(255,193,7,0.4);
+  transition:transform 0.15s ease,box-shadow 0.3s ease;
 }
-#btn-enter:hover { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,193,7,0.8); }
-#btn-enter:active { transform: scale(0.96); }
+#btn-enter:hover {transform:scale(1.05);}
+#btn-enter:active {transform:scale(0.94);}
 
-/* توست ساده‌تر و سبک‌تر */
+/* توست */
 #toast {
-  position: fixed; bottom: 110px; left: 50%;
-  transform: translateX(-50%) translateY(15px);
-  padding: 12px 24px; border-radius: 12px;
-  background: rgba(20,20,20,0.95);
-  border: 1px solid rgba(255,215,0,0.3);
-  color: var(--gold); font-size: 1rem;
-  opacity: 0; transition: opacity 0.25s ease, transform 0.3s ease;
-  pointer-events: none;
+  position: fixed; bottom: 120px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(20,20,20,0.98);
+  border: 2px solid var(--gold); color: var(--gold);
+  padding: 15px 25px; border-radius: 12px;
+  opacity: 0; transition: all 0.3s ease; pointer-events: none;
+  z-index: 20000; white-space: nowrap;
 }
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.show {opacity: 1; transform: translateX(-50%) translateY(0);}
 
-/* تعویض تب فوق‌العاده نرم ولی کم‌هزینه */
+/* تب‌ها */
 .tab-view {
-  opacity: 0; transform: translateY(10px) translateZ(0);
-  transition: opacity 0.3s linear, transform 0.3s ease-out;
-  display: none;
+  opacity:0; transform:translateY(15px);
+  transition:opacity 0.3s ease, transform 0.3s ease;
+  display:none; position:absolute; inset:0;
+  flex-direction:column; align-items:center; padding:20px; overflow-y:auto;
 }
-.tab-view.active-tab {
-  display: flex; opacity: 1; transform: translateY(0) translateZ(0);
-}
+.tab-view.active-tab {opacity:1; transform:translateY(0); display:flex;}
 
-/* حرکت خط ناوبری نرم ولی سبک */
-#nav-indicator {
-  transition: left 0.4s cubic-bezier(0.4,0,0.2,1);
+/* کارت سبک */
+.card {
+  background: var(--glass); border: var(--glass-border);
+  border-radius: 25px; padding: 25px; width: 100%; max-width: 380px;
+  text-align: center; margin-bottom: 25px; box-shadow: 0 10px 40px #000;
 }
+.img-box {width:200px;height:200px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(255,215,0,0.1),transparent 70%);border-radius:50%;}
+.card-img {width: 100%; height: 100%; object-fit: contain;}
+
+/* دکمه‌های داخلی */
+.btn {
+  width:100%;padding:18px;margin-top:15px;
+  border:none;border-radius:15px;font-weight:bold;
+  transition:transform 0.15s ease;cursor:pointer;
+}
+.btn-act {background:linear-gradient(145deg,#3e2723,#251614);color:var(--gold);}
+.btn-act:active {transform:scale(0.96);}
+.btn-glean {background:linear-gradient(145deg,#00695c,#004d40);color:#fff;}
+.btn-buy {background:linear-gradient(145deg,#2e7d32,#1b5e20);color:#fff;}
+.btn.loading .timer {display:flex;}
+.timer {position:absolute;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;color:var(--gold);border-radius:15px;}
+
+/* ناوبری */
+nav {height:90px;background:rgba(10,10,10,0.95);display:grid;grid-template-columns:repeat(4,1fr);position:relative;border-top:1px solid rgba(255,255,255,0.1);}
+.nav-btn {background:none;border:none;color:#777;display:flex;flex-direction:column;align-items:center;font-weight:bold;transition:color 0.3s;}
+.nav-btn.active{color:var(--gold);}
+#nav-indicator {position:absolute;top:0;left:0;width:25%;height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);transition:left 0.4s cubic-bezier(0.4,0,0.2,1);}
+.icon {font-size:1.8rem;margin-bottom:5px;}
 </style>
+</head>
+<body>
+
+<!-- Modal -->
+<div id="start-modal">
+  <div class="modal-box">
+    <img src="images/shovel.png" style="width:120px;margin-bottom:20px;">
+    <h1 style="color:var(--gold);margin-bottom:10px;">امپراطوری پارسه</h1>
+    <p style="color:#ccc;margin-bottom:20px;">به داستان امپراطوری بپیوندید...</p>
+    <button id="btn-enter">ورود به داستان</button>
+  </div>
+</div>
+
+<!-- Header -->
+<header style="padding:10px 20px;background:linear-gradient(180deg,rgba(0,0,0,0.95),transparent)">
+  <div style="display:flex;justify-content:space-between;">
+    <div>🍞 <span id="v-bread">0</span></div>
+    <div id="v-rank" style="color:var(--gold)">برزیگر</div>
+    <div>💰 <span id="v-coin">0</span></div>
+  </div>
+  <div style="text-align:center;margin-top:5px;color:#aaa;">شیر: <span id="v-milk" style="color:#fff">0</span> | پیشرفت: <span id="v-xp">0</span></div>
+  <div style="background:#222;height:10px;border-radius:4px;margin-top:4px;"><div id="bar-xp" style="height:10px;background:linear-gradient(90deg,#00e5ff,#2979ff);width:0%;border-radius:4px;"></div></div>
+</header>
+
+<!-- Tabs -->
+<div id="game-area" style="flex:1;position:relative;">
+  <div id="view-farm" class="tab-view active-tab">
+    <div class="card">
+      <h2>کشتزارهای پارس</h2>
+      <div class="img-box"><img src="images/shovel.png" class="card-img"></div>
+      <button id="btn-farm" class="btn btn-act">کشت (۳۵ دقیقه)<div class="timer" id="t-farm">00:00</div></button>
+      <button id="btn-glean" class="btn btn-glean">خوشه‌چینی<div class="timer" id="t-glean">00:00</div></button>
+    </div>
+  </div>
+  <div id="view-smith" class="tab-view">
+    <div class="card">
+      <h2>آهنگرسرا</h2>
+      <div class="img-box"><img src="images/repair.png" class="card-img"></div>
+      <button id="btn-rep" class="btn btn-act">بازسازی<div class="timer" id="t-rep">00:00</div></button>
+    </div>
+  </div>
+  <div id="view-herd" class="tab-view"><div id="herd-box" style="width:100%;"></div></div>
+  <div id="view-tribe" class="tab-view"><div class="card"><h2>خاندان‌ها</h2><p>به‌زودی...</p></div></div>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <div id="nav-indicator"></div>
+  <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span>کشت</button>
+  <button id="nav-2" class="nav-btn"><span class="icon">🔨</span>آهنگری</button>
+  <button id="nav-3" class="nav-btn"><span class="icon">🐑</span>گله</button>
+  <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span>خاندان</button>
+</nav>
+
+<div id="toast"></div>
 
 <script>
-// رفع تأخیر واکنش تاچ در موبایل
+const SAVE_KEY='PARSEH_BETA';
+const CFG={farm:35*60,glean:3,rep:15*60,levels:[100,200,330,440,555,710,1000,99999],ranks:["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"]};
+let G={bread:0,coins:0,milk:0,dur:3,xp:0,lvl:1,end:{farm:0,glean:0,rep:0},seen:false};
+
+function el(id){return document.getElementById(id);}
+function now(){return Math.floor(Date.now()/1000);}
+function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
+function load(){let d=localStorage.getItem(SAVE_KEY);if(d)G=Object.assign(G,JSON.parse(d));}
+function vibrate(){if(navigator.vibrate)navigator.vibrate(15);}
+function msg(t){let m=el('toast');m.textContent=t;m.classList.add('show');vibrate();setTimeout(()=>m.classList.remove('show'),2000);}
+function fmt(s){const m=Math.floor(s/60),ss=s%60;return m+":"+(ss<10?"0":"")+ss;}
+
+function switchTab(n){
+  vibrate();
+  const pos=(n-1)*25; el('nav-indicator').style.left=pos+"%";
+  for(let i=1;i<=4;i++)el('nav-'+i).classList.remove('active');
+  el('nav-'+n).classList.add('active');
+  ['farm','smith','herd','tribe'].forEach((t,i)=>el('view-'+t).classList.toggle('active-tab',n-1===i));
+}
+
+function render(){
+  el('v-bread').textContent=G.bread;
+  el('v-coin').textContent=G.coins;
+  el('v-milk').textContent=Math.floor(G.milk);
+  el('v-rank').textContent=CFG.ranks[Math.min(G.lvl,8)-1];
+  const req=CFG.levels[Math.min(G.lvl,8)-1]; const pct=(G.xp/req)*100;
+  el('v-xp').textContent=G.xp+"/"+req+" بَهر"; el('bar-xp').style.width=pct+"%";
+  ['farm','glean','rep'].forEach(k=>{
+    const btn=el('btn-'+k);
+    if(G.end[k]>now()){btn.classList.add('loading');btn.disabled=true;el('t-'+k).textContent=fmt(G.end[k]-now());}
+    else{btn.classList.remove('loading');btn.disabled=false;}
+  });
+}
+
+function finish(task){
+  if(task==='farm'){G.end.farm=0;G.bread+=2;G.dur--;msg("+۲ نان");}
+  if(task==='glean'){G.end.glean=0;G.xp+=.04;msg("پیشرفت!");}
+  if(task==='rep'){G.end.rep=0;G.dur=3;msg("ابزار تعمیر شد");}
+  const req=CFG.levels[Math.min(G.lvl,8)-1];
+  if(G.xp>=req&&G.lvl<8){G.lvl++;G.xp=0;msg("ارتقا 🎉");}
+  save();render();
+}
+
+function loop(){
+  Object.keys(G.end).forEach(k=>{
+    if(G.end[k]>0){
+      if(now()>=G.end[k])finish(k);
+      else if(el('t-'+k))el('t-'+k).textContent=fmt(G.end[k]-now());
+    }
+  });
+}
+
+window// رفع تأخیر واکنش تاچ در موبایل
 document.addEventListener('touchstart',()=>{}, {passive:true});
 
 function el(id){return document.getElementById(id);}
@@ -2237,6 +2367,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
     </script>
 </body>
 </html>
+
 
 
 
