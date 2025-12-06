@@ -7,13 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- استایل‌ها (تمیز و مرتب) --- */
-        :root { 
-            --bg: #000; 
-            --gold: #ffc107; 
-            --glass: rgba(30, 30, 30, 0.9); 
-        }
-        
+        /* --- استایل‌ها --- */
+        :root { --bg: #050505; --gold: #ffc107; --glass: rgba(30, 30, 30, 0.9); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         
         body {
@@ -45,15 +40,12 @@
             padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
         }
         .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
-        
         .pill { 
             background: rgba(60,60,60,0.8); border: 1px solid #555; border-radius: 15px; 
             padding: 6px 15px; display: flex; align-items: center; gap: 8px; min-width: 90px; 
         }
         .pill img { width: 35px; height: 35px; object-fit: contain; }
         .pill span { font-weight: bold; font-size: 1.2rem; }
-        .alt-emoji { display: none; font-size: 1.8rem; margin: 0 5px; } /* ایموجی جایگزین */
-
         .rank-title { font-size: 1.4rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold); }
 
         .xp-con { width: 100%; display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
@@ -62,8 +54,6 @@
 
         /* بدنه */
         #game-area { flex: 1; position: relative; width: 100%; }
-        
-        /* تب‌ها */
         .tab-view { 
             position: absolute; inset: 0; display: none; flex-direction: column; 
             align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
@@ -89,19 +79,5 @@
         .btn-act { background: #3e2723; color: var(--gold); border: 2px solid #5d4037; box-shadow: 0 6px 0 #1b0000; }
         .btn-act:active { transform: translateY(4px); box-shadow: 0 2px 0 #1b0000; }
         .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: none; }
-        
         .btn-glean { background: #004d40; color: #fff; box-shadow: 0 6px 0 #00251a; }
-        .btn-glean:active { transform: translateY(4px); box-shadow: 0 2px 0 #00251a; }
-        
-        .btn-buy { background: #1b5e20; color: #fff; box-shadow: 0 6px 0 #0d330f; }
-
-        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 18px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.6rem; }
-        .btn.loading .timer { display: flex; }
-
-        /* نوار پایین */
-        nav { height: 95px; background: #0a0a0a; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #333; z-index: 50; }
-        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; padding: 5px; }
-        .nav-btn.active { color: var(--gold); background: #222; border-top: 3px solid var(--gold); }
-        .icon { font-size: 2rem; margin-bottom: 5px; }
-
-        #toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: #222
+        .btn-buy { background: #1b5e20; color: #fff; box-
