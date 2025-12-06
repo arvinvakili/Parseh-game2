@@ -7,14 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- تنظیمات اصلی --- */
-        :root { 
-            --bg: #050505; 
-            --gold: #ffc107; 
-            --glass: rgba(30, 30, 30, 0.85); 
-            --glass-border: 1px solid rgba(255, 215, 0, 0.3);
-        }
-        
+        /* --- استایل‌ها (همان استایل‌های زیبای قبلی) --- */
+        :root { --bg: #050505; --gold: #ffc107; --panel: rgba(30,30,30,0.98); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
         
         body {
@@ -23,17 +17,70 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- مودال شروع --- */
+        /* مودال شروع */
         #start-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         }
         .modal-box {
-            border: 2px solid var(--gold); padding: 40px; border-radius: 30px;
-            text-align: center; width: 85%; max-width: 350px; 
-            background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
-            box-shadow: 0 0 60px rgba(255, 193, 7, 0.3);
+            border: 2px solid var(--gold); padding: 30px; border-radius: 20px;
+            text-align: center; width: 85%; max-width: 350px; background: #111;
+            box-shadow: 0 0 50px rgba(255, 193, 7, 0.4);
+        }
+        #btn-enter {
+            background: var(--gold); color: #000; border: none; padding: 15px 50px;
+            font-size: 1.4rem; font-weight: bold; border-radius: 50px; margin-top: 25px;
+            cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%; display: block;
+        }
+
+        /* هدر */
+        header { 
+            height: 130px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
+            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
+        }
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
+        
+        .pill { 
+            background: rgba(60,60,60,0.8); border: 1px solid #555; border-radius: 12px; 
+            padding: 5px 15px; display: flex; align-items: center; gap: 10px; min-width: 90px; 
+        }
+        .pill img { width: 35px; height: 35px; object-fit: contain; }
+        .pill span { font-weight: bold; font-size: 1.2rem; }
+        .alt-emoji { display: none; font-size: 1.5rem; }
+        .rank-title { font-size: 1.3rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 5px var(--gold); }
+
+        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
+        .xp-bg { width: 100%; height: 8px; background: #222; border-radius: 4px; overflow: hidden; border: 1px solid #444; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #00b09b, #96c93d); width: 0%; transition: width 0.3s; }
+
+        /* بدنه */
+        #game-area { flex: 1; position: relative; width: 100%; }
+        .tab-view { 
+            position: absolute; inset: 0; display: none; flex-direction: column; 
+            align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
+        }
+        .tab-view.active-tab { display: flex; }
+
+        /* کارت */
+        .card { background: var(--panel); border: 2px solid #3e2723; border-radius: 20px; padding: 20px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px #000; }
+        .img-box { width: 200px; height: 200px; margin: 0 auto 15px auto; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.1), transparent 70%); border-radius: 50%; }
+        .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(1.1); }
+        .big-emoji { font-size: 6rem; display: none; filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
+
+        /* دکمه‌ها */
+        .btn { width: 100%; padding: 20px; margin-top: 15px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; position: relative; }
+        .btn-act { background: #3e2723; color: var(--gold); border: 2px solid #5d4037; box-shadow: 0 5px 0 #1b0000; }
+        .btn-act:active { transform: translateY(4px); box-shadow: 0 1px 0 #1b0000; }
+        .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: none; }
+        .btn-glean { background: #004d40; color: #fff; box-shadow: 0 5px 0 #00251a; }
+        .btn-buy { background: #1b5e20; color: #fff; }
+
+        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 12px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.4rem; }
+        .btn.loading .timer { display: flex; }
+
+        /* نوار پایین */
+        nav { height: 90px; background: #0a0a0a; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid #333; z-index: 50; }
+        .nav-btn { background: none; border: none;
         }
         #btn-enter {
             background: linear-gradient(to right, #ffca28, #ff6f00); 
@@ -1456,6 +1503,7 @@
     </script>
 </body>
 </html>
+
 
 
 
