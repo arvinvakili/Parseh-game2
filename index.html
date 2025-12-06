@@ -2,211 +2,176 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>امپراطوری پارسه</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
-        :root {
-            --bg: #050505;
-            --gold: #ffc107;
-            --panel: rgba(30,30,30,0.98);
+        /* --- استایل‌های پایه --- */
+        :root { 
+            --bg: #000; 
+            --gold: #ffc107; 
+            /* شیشه‌ای حرفه‌ای iOS */
+            --glass: rgba(30, 30, 30, 0.65); 
+            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
         }
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: manipulation;
-        }
+        
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
+        
         body {
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
-            color: #fff;
-            font-family: Tahoma, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+            color: #fff; font-family: 'Tahoma', serif; margin: 0; height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
         }
+
+        /* --- افکت کلیک دکمه‌ها --- */
+        button:active {
+            transform: scale(0.95) !important;
+            filter: brightness(1.2);
+        }
+
+        /* --- مودال شروع --- */
         #start-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.98);
-            z-index: 10000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
         }
         .modal-box {
-            border: 2px solid var(--gold);
-            padding: 30px;
-            border-radius: 20px;
-            background: #111;
-            text-align: center;
-            width: 85%;
-            max-width: 350px;
+            border: 2px solid var(--gold); padding: 40px; border-radius: 30px;
+            text-align: center; width: 85%; max-width: 350px; 
+            background: rgba(20,20,20,0.9); box-shadow: 0 0 50px rgba(255, 193, 7, 0.3);
         }
         .start-btn {
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.3rem;
-            border-radius: 40px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 20px var(--gold);
+            background: linear-gradient(135deg, #ffca28, #ff6f00); 
+            color: #000; border: none; padding: 18px 50px;
+            font-size: 1.4rem; font-weight: bold; border-radius: 50px; margin-top: 25px;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(255,193,7,0.4);
+            transition: all 0.1s;
         }
-        header {
-            height: 130px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent);
-            padding: 10px 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            z-index: 10;
+
+        /* --- هدر --- */
+        header { 
+            height: 140px; background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent); 
+            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
         }
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
+        
+        .pill { 
+            background: rgba(0,0,0,0.5); border: var(--glass-border); border-radius: 12px; 
+            padding: 5px 15px; display: flex; align-items: center; gap: 8px; min-width: 90px;
+            backdrop-filter: blur(10px);
         }
-        .pill {
-            background: rgba(60,60,60,0.8);
-            border: 1px solid #555;
-            border-radius: 12px;
-            padding: 5px 15px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            min-width: 90px;
+        .pill img { width: 35px; height: 35px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+        .pill span { font-weight: bold; font-size: 1.2rem; text-shadow: 0 2px 2px #000; }
+        
+        .rank-title { font-size: 1.3rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px rgba(255,193,7,0.6); }
+
+        /* نوار XP نئونی */
+        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+        .xp-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.6); border-radius: 5px; overflow: hidden; border: 1px solid #444; }
+        .xp-fill { 
+            height: 100%; background: linear-gradient(90deg, #00b09b, #96c93d); width: 0%; 
+            transition: width 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 10px #96c93d;
         }
-        .pill img {
-            width: 30px;
-            height: 30px;
+
+        /* --- بدنه --- */
+        #game-area { flex: 1; position: relative; width: 100%; }
+        
+        .tab-view { 
+            position: absolute; inset: 0; opacity: 0; visibility: hidden; 
+            transition: opacity 0.2s; display: flex; flex-direction: column; 
+            align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
         }
-        .pill span {
-            font-weight: bold;
-            font-size: 1.1rem;
+        .tab-view.active-tab { opacity: 1; visibility: visible; }
+
+        /* کارت شیشه‌ای حرفه‌ای */
+        .card { 
+            background: var(--glass); border: var(--glass-border); border-radius: 24px; 
+            padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
-        .rank-title {
-            color: var(--gold);
-            text-shadow: 0 0 5px var(--gold);
-            font-size: 1.2rem;
+        .img-box { 
+            width: 180px; height: 180px; margin: 0 auto 20px; 
+            display: flex; justify-content: center; align-items: center; 
+            background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%); border-radius: 50%;
         }
-        .xp-con {
-            margin-top: 5px;
-            width: 100%;
+        .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); transform: scale(1.1); }
+        /* ایموجی جایگزین */
+        .big-emoji { font-size: 6rem; display: none; filter: drop-shadow(0 0 20px rgba(255,255,255,0.2)); }
+
+        /* دکمه‌ها */
+        .btn { 
+            width: 100%; padding: 20px; margin-top: 15px; border-radius: 16px; border: none; 
+            font-size: 1.2rem; font-weight: bold; cursor: pointer; position: relative; 
+            transition: transform 0.1s, filter 0.1s;
         }
-        .xp-bg {
-            height: 8px;
-            background: #333;
-            border-radius: 4px;
+        .btn-act { background: linear-gradient(145deg, #3e2723, #2a1b18); color: var(--gold); border: 1px solid #5d4037; box-shadow: 0 5px 0 #1b0e0c; }
+        .btn-act:disabled { background: #333; color: #666; box-shadow: none; transform: translateY(5px); }
+        
+        .btn-glean { background: linear-gradient(145deg, #00695c, #004d40); color: #fff; box-shadow: 0 5px 0 #00251a; }
+        .btn-buy { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: #fff; box-shadow: 0 5px 0 #0d330f; }
+
+        .timer { 
+            position: absolute; inset: 0; background: rgba(0,0,0,0.85); border-radius: 16px; 
+            display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.5rem; 
+            backdrop-filter: blur(5px);
         }
-        .xp-fill {
-            height: 8px;
-            background: linear-gradient(90deg, #00b09b, #96c93d);
-            transition: width 0.3s;
-            border-radius: 4px;
+        .btn.loading .timer { display: flex; }
+
+        /* نوار پایین */
+        nav { 
+            height: 95px; background: rgba(10,10,10,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; 
         }
-        #game-area {
-            flex: 1;
-            overflow-y: auto;
-            position: relative;
-        }
-        .tab-view {
-            display: none;
-            padding: 15px;
-        }
-        .tab-view.active-tab {
-            display: block;
-        }
-        .card {
-            background: var(--panel);
-            border: 2px solid #3e2723;
-            border-radius: 20px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 10px 20px #000;
-            margin-bottom: 20px;
-        }
-        .img-box {
-            width: 200px;
-            height: 200px;
-            margin: auto;
-        }
-        .card-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            margin-top: 10px;
-            font-size: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .btn-act { background: #3e2723; color: var(--gold); }
-        .btn-glean { background: #004d40; color: #fff; }
-        .btn-buy { background: #1b5e20; color: #fff; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .timer { display: none; }
-        .loading .timer { display: block; }
-        nav {
-            height: 90px;
-            background: #0a0a0a;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            border-top: 2px solid #333;
-        }
-        .nav-btn {
-            background: none;
-            border: none;
-            color: #aaa;
-            text-align: center;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .nav-btn.active {
-            color: var(--gold);
-            border-top: 3px solid var(--gold);
-        }
-        #toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #222;
-            color: var(--gold);
-            border: 1px solid var(--gold);
-            border-radius: 8px;
-            padding: 10px 15px;
-            display: none;
-            z-index: 100000;
+        .nav-btn { background: none; border: none; color: #777; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; padding: 10px; transition: color 0.2s; }
+        .nav-btn.active { color: var(--gold); background: radial-gradient(circle at bottom, rgba(255,215,0,0.15), transparent 70%); border-top: 3px solid var(--gold); }
+        .icon { font-size: 2rem; margin-bottom: 5px; filter: drop-shadow(0 2px 2px #000); }
+
+        #toast { 
+            position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); 
+            background: rgba(20,20,20,0.95); border: 1px solid var(--gold); color: var(--gold); 
+            padding: 15px 30px; border-radius: 15px; display: none; z-index: 20000; 
+            white-space: nowrap; font-size: 1.1rem; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
         }
     </style>
 </head>
 <body>
+
     <div id="start-modal">
         <div class="modal-box">
-            <h1 style="color:var(--gold);font-size:2rem;margin-bottom:10px;">امپراطوری پارسه</h1>
-            <p style="color:#bbb;">به داستان امپراطوری بپیوندید...<br>تاریخ در انتظار شماست.</p>
+            <img src="images/shovel.png" style="width:100px;margin-bottom:20px;" onload="this.style.display='inline'" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+            <div style="font-size:5rem;display:none;margin-bottom:20px;">🏛️</div>
+            
+            <h1 style="color:var(--gold);font-size:2.2rem;margin-bottom:15px;">امپراطوری پارسه</h1>
+            <p style="color:#ccc;font-size:1.1rem;line-height:1.6;margin-bottom:20px;">
+                به داستان امپراطوری بپیوندید...<br>
+                تاریخ در دستان شماست.
+            </p>
             <button id="btn-enter" class="start-btn">ورود به داستان</button>
         </div>
     </div>
 
     <header>
         <div class="row">
-            <div class="pill"><span>🍞</span><span id="v-bread">0</span></div>
+            <div class="pill">
+                <img src="images/bread.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                <span class="big-emoji" style="font-size:1.5rem; display:none;">🍞</span>
+                <span id="v-bread">0</span>
+            </div>
+            
             <div class="rank-title" id="v-rank">برزیگر</div>
-            <div class="pill"><span id="v-coin">0</span><span>💰</span></div>
+            
+            <div class="pill">
+                <span id="v-coin">0</span>
+                <img src="images/daric.png" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'">
+                <span class="big-emoji" style="font-size:1.5rem; display:none;">💰</span>
+            </div>
         </div>
-        <div style="text-align:center;font-size:0.8rem;color:#aaa;">شیر: <span id="v-milk">0</span> | پیشرفت: <span id="v-xp">0%</span></div>
+        <div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#aaa;">
+            شیر: <span id="v-milk" style="color:#fff;font-weight:bold;">0</span> | پیشرفت: <span id="v-xp">0%</span>
+        </div>
         <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="bar-xp" style="width:0%;"></div></div></div>
     </header>
 
@@ -214,134 +179,289 @@
         <div id="view-farm" class="tab-view active-tab">
             <div class="card">
                 <h2>کشتزارهای پارس</h2>
-                <div style="margin: 10px auto;">توان: <span id="v-dur">3/3</span></div>
-                <button id="btn-farm" class="btn btn-act">کشت (۳۵ دقیقه)<div class="timer" id="t-farm"></div></button>
-                <button id="btn-glean" class="btn btn-glean">خوشه‌چینی (سریع)<div class="timer" id="t-glean"></div></button>
+                <div class="img-box">
+                    <img src="images/shovel.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div class="big-emoji">🌾</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#aaa;font-size:0.8rem;">
+                    <span>توان</span> <span id="v-dur">3/3</span>
+                </div>
+                <div style="width:100%;height:8px;background:#000;border-radius:4px;"><div id="bar-dur" style="width:100%;height:100%;background:orange;"></div></div>
+                
+                <button id="btn-farm" class="btn btn-act">
+                    کشت (۳۵ دقیقه)
+                    <div class="timer" id="t-farm">00:00</div>
+                </button>
+                <button id="btn-glean" class="btn btn-glean">
+                    خوشه‌چینی (سریع)
+                    <div class="timer" id="t-glean">00:00</div>
+                </button>
             </div>
         </div>
 
         <div id="view-smith" class="tab-view">
             <div class="card">
                 <h2>آهنگرسرا</h2>
+                <div class="img-box">
+                    <img src="images/repair.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div class="big-emoji">🔥</div>
+                </div>
                 <p style="color:#aaa;">بازسازی ابزار</p>
-                <button id="btn-rep" class="btn btn-act">بازسازی (۱۵ دقیقه)<div class="timer" id="t-rep"></div></button>
+                <button id="btn-rep" class="btn btn-act">
+                    بازسازی (۱۵ دقیقه)
+                    <div class="timer" id="t-rep">00:00</div>
+                </button>
             </div>
         </div>
 
         <div id="view-herd" class="tab-view">
             <div id="herd-box" style="width:100%"></div>
         </div>
-        
+
         <div id="view-tribe" class="tab-view">
-            <div class="card"><h2>خاندان‌ها</h2><p>به زودی...</p></div>
+            <div class="card"><h2>خاندان‌ها</h2><div class="img-box"><div style="font-size:6rem;">🛡️</div></div><p>به زودی...</p></div>
         </div>
     </div>
 
     <nav>
-        <button id="nav-1" class="nav-btn active">🌾<br>کشت</button>
-        <button id="nav-2" class="nav-btn">🔨<br>آهنگری</button>
-        <button id="nav-3" class="nav-btn">🐏<br>گله</button>
-        <button id="nav-4" class="nav-btn">🛡️<br>خاندان</button>
+        <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span><br>کشت</button>
+        <button id="nav-2" class="nav-btn"><span class="icon">🔨</span><br>آهنگری</button>
+        <button id="nav-3" class="nav-btn"><span class="icon">🐏</span><br>گله</button>
+        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span><br>خاندان</button>
     </nav>
 
     <div id="toast"></div>
 
     <script>
-    const SAVE_KEY = 'PARSEH_V5';
+    // تنظیمات
+    const T_M = 60; // 60 برای انتشار
+    const STORAGE_KEY = 'PARSEH_CLOUD_V1';
+
     const CFG = {
-        T_M: 60,
-        farm: 35*60,
-        glean: 3,
-        rep: 15*60,
-        maxDur: 3,
+        farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
         animals: [
-            {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*60, out:3, icon:'🐄', lvl:2},
-            {id:'sheep', n:'گوسفند', c:35, f:2, t:25*60, out:2, icon:'🐑', lvl:3},
-            {id:'goat', n:'بز کوهی', c:20, f:3, t:35*60, out:1, icon:'🐐', lvl:5}
+            {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'cow.png', icon:'🐄', lvl:2},
+            {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
+            {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
         ],
-        ranks:["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
-        levels:[100,200,330,440,555,710,1000,99999]
+        ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
+        levels: [100,200,330,440,555,710,1000,99999]
     };
-    let G = {bread:0,coins:0,milk:0,dur:3,lvl:1,xp:0,end:{farm:0,glean:0,rep:0},animals:{},seen:false};
 
-    function el(i){return document.getElementById(i);}
-    function now(){return Math.floor(Date.now()/1000);}
-    function fmt(s){if(s<0)s=0;let m=Math.floor(s/60),sec=s%60;return m+":"+(sec<10?"0":"")+sec;}
-    function msg(t){const e=el("toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",2500);}
-    function save(){localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
-    function load(){let d=localStorage.getItem(SAVE_KEY);if(d){try{G=Object.assign(G,JSON.parse(d));}catch(e){}}}
+    let G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0, glean:0, rep:0}, animals:{}, seen:false };
 
-    function render(){
-        el("v-bread").innerText=G.bread;
-        el("v-coin").innerText=G.coins;
-        el("v-milk").innerText=Math.floor(G.milk);
-        el("v-rank").innerText=CFG.ranks[G.lvl-1];
-        el("v-dur").innerText=G.dur+"/3";
-        let req=CFG.levels[G.lvl-1],pct=Math.min(100,Math.floor(G.xp/req*100));
-        el("v-xp").textContent=pct+"%"; el("bar-xp").style.width=pct+"%";
+    // --- توابع کمکی ---
+    function el(id) { return document.getElementById(id); }
+    function now() { return Math.floor(Date.now()/1000); }
+    
+    // --- ذخیره و بازیابی (Cloud + Local) ---
+    function save() {
+        const json = JSON.stringify(G);
+        // ذخیره لوکال (سریع)
+        localStorage.setItem(STORAGE_KEY, json);
+        // ذخیره ابری (اگر در تلگرام باشد)
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
+            window.Telegram.WebApp.CloudStorage.setItem(STORAGE_KEY, json);
+        }
     }
 
-    function switchTab(n){
-        document.querySelectorAll('.tab-view').forEach(x=>x.classList.remove('active-tab'));
-        document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-        el("view-"+n).classList.add('active-tab');
-        if(n==="herd") renderHerd();
-        const map={farm:"nav-1",smith:"nav-2",herd:"nav-3",tribe:"nav-4"};
+    function load(callback) {
+        // 1. اول لوکال را چک کن (برای سرعت)
+        let localData = localStorage.getItem(STORAGE_KEY);
+        if (localData) {
+            try { 
+                let t = JSON.parse(localData);
+                G = Object.assign(G, t);
+                if(!G.animals) G.animals={};
+            } catch(e){}
+        }
+
+        // 2. تلاش برای سینک ابری
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
+            window.Telegram.WebApp.CloudStorage.getItem(STORAGE_KEY, (err, val) => {
+                if (!err && val) {
+                    try {
+                        let cloudData = JSON.parse(val);
+                        // اگر دیتای ابری موجود بود، جایگزین کن
+                        G = Object.assign(G, cloudData);
+                        if(!G.animals) G.animals={};
+                        console.log("Cloud synced");
+                    } catch(e){}
+                }
+                callback();
+            });
+        } else {
+            callback();
+        }
+    }
+
+    function msg(txt) {
+        const e = el("toast"); e.textContent = txt; e.style.display = "block";
+        setTimeout(() => e.style.display = "none", 2500);
+        // بازخورد لرزشی
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.HapticFeedback) {
+            window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+        }
+    }
+
+    function render() {
+        el("v-bread").innerText = G.bread;
+        el("v-coin").innerText = G.coins;
+        el("v-milk").innerText = Math.floor(G.milk);
+        el("v-rank").innerText = CFG.ranks[Math.min(G.lvl,8)-1];
+        el("v-dur").innerText = G.dur + "/3";
+        el("bar-dur").style.width = (G.dur/3)*100 + "%";
+        
+        let req = CFG.levels[Math.min(G.lvl,8)-1] || 9999;
+        let pct = (G.lvl>=8) ? 100 : Math.floor((G.xp/req)*100);
+        el("v-xp").textContent = pct + "%"; 
+        el("bar-xp").style.width = pct + "%";
+
+        // وضعیت دکمه‌ها
+        setBtnState('btn-farm', G.end.farm, G.dur<=0);
+        setBtnState('btn-glean', G.end.glean, false);
+        setBtnState('btn-rep', G.end.rep, G.dur>0);
+    }
+
+    function setBtnState(id, end, disabled) {
+        let btn = el(id);
+        if (end > 0) {
+            btn.classList.add('loading');
+            btn.disabled = true;
+        } else {
+            btn.classList.remove('loading');
+            btn.disabled = disabled;
+        }
+    }
+
+    function switchTab(n) {
+        document.querySelectorAll('.tab-view').forEach(x => x.classList.remove('active-tab'));
+        document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
+        
+        el("view-" + n).classList.add('active-tab');
+        
+        let map = {farm:'nav-1', smith:'nav-2', herd:'nav-3', tribe:'nav-4'};
         el(map[n]).classList.add('active');
+        
+        if (n === "herd") renderHerd();
     }
 
-    function renderHerd(){
-        let h="";
-        CFG.animals.forEach(a=>{
-            let has=G.animals[a.id], busy=G.end[a.id]>0, lock=G.lvl<a.lvl;
-            h+=`<div class="card"><h3>${a.n}</h3>`;
-            if(lock) h+=`<div style="color:#ff6666">قفل (نیاز به رتبه ${CFG.ranks[a.lvl-1]})</div>`;
-            else if(!has) h+=`<button class="btn btn-buy" onclick="buy('${a.id}')">خرید (${a.c} دریک)</button>`;
-            else if(busy) h+=`<button class="btn btn-act loading" disabled><div id="tm-${a.id}" class="timer">...</div></button>`;
-            else h+=`<button class="btn btn-act" onclick="milk('${a.id}')">دوشیدن (${a.f} نان)</button>`;
-            h+=`</div>`;
+    function renderHerd() {
+        let h = "";
+        CFG.animals.forEach(a => {
+            let has = G.animals[a.id], busy = G.end[a.id] > 0, lock = G.lvl < a.lvl;
+            h += `<div class="card"><h2>${a.n}</h2>`;
+            h += `<div class="img-box"><img src="images/${a.img}" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji">${a.icon}</div></div>`;
+            
+            if (lock) h += `<div style="color:#ef5350; background:rgba(0,0,0,0.6); padding:10px; border-radius:10px;">قفل (رتبه ${CFG.ranks[a.lvl-1]})</div>`;
+            else if (!has) h += `<button class="btn btn-buy" id="b-buy-${a.id}">خرید (${a.c} دریک)</button>`;
+            else if (busy) h += `<button class="btn btn-act loading" disabled>... <div class="timer" id="tm-${a.id}" style="display:flex"></div></button>`;
+            else h += `<button class="btn btn-act" id="b-milk-${a.id}">دوشیدن (${a.f} نان)</button>`;
+            h += `</div>`;
         });
-        el("herd-box").innerHTML=h;
-    }
+        el("herd-box").innerHTML = h;
 
-    function actFarm(){if(G.dur<=0)return msg("ابزار نیاز به تعمیر دارد");G.end.farm=now()+CFG.farm;save();}
-    function actGlean(){G.end.glean=now()+CFG.glean;save();}
-    function actRep(){G.end.rep=now()+CFG.rep;save();}
-
-    function buy(id){let a=CFG.animals.find(x=>x.id===id);if(G.coins<a.c)return msg("دریک کافی نیست");G.coins-=a.c;G.animals[id]=true;save();renderHerd();render();}
-    function milk(id){let a=CFG.animals.find(x=>x.id===id);if(G.bread<a.f)return msg("نان کافی نیست");G.bread-=a.f;G.end[id]=now()+a.t;save();renderHerd();}
-
-    function addXP(n){G.xp+=n;let r=CFG.levels[G.lvl-1];if(G.xp>=r&&G.lvl<8){G.xp-=r;G.lvl++;msg("ارتقا رتبه!");}render();save();}
-
-    function finFarm(){G.end.farm=0;G.bread+=2;G.dur--;addXP(5);msg("+۲ نان");save();}
-    function finGlean(){G.end.glean=0;G.bread++;addXP(1);msg("+۱ نان سریع!");save();}
-    function finRep(){G.end.rep=0;G.dur=3;msg("ابزار بازسازی شد");save();}
-    function finMilk(id){let a=CFG.animals.find(x=>x.id===id);G.end[id]=0;G.milk+=a.out;msg("شیر دوشیده شد");renderHerd();save();render();}
-
-    function loop(){
-        const n=now();
-        if(G.end.farm && n>=G.end.farm) finFarm();
-        if(G.end.glean && n>=G.end.glean) finGlean();
-        if(G.end.rep && n>=G.end.rep) finRep();
-        CFG.animals.forEach(a=>{
-            if(G.end[a.id] && n>=G.end[a.id]) finMilk(a.id)
-            else if(G.end[a.id]){let e=el("tm-"+a.id);if(e)e.innerText=fmt(G.end[a.id]-n);}
+        // اتصال دکمه‌های گله
+        CFG.animals.forEach(a => {
+            if(el(`b-buy-${a.id}`)) el(`b-buy-${a.id}`).onclick = () => buy(a.id);
+            if(el(`b-milk-${a.id}`)) el(`b-milk-${a.id}`).onclick = () => milk(a.id);
         });
-        render();
     }
 
-    window.addEventListener("DOMContentLoaded",()=>{
-        load();render();
-        if(G.seen) el("start-modal").style.display="none";
-        el("btn-enter").onclick=()=>{G.seen=true;save();el("start-modal").style.display="none";msg("خوش آمدید!")};
-        el("btn-farm").onclick=actFarm;
-        el("btn-glean").onclick=actGlean;
-        el("btn-rep").onclick=actRep;
-        el("nav-1").onclick=()=>switchTab("farm");
-        el("nav-2").onclick=()=>switchTab("smith");
-        el("nav-3").onclick=()=>switchTab("herd");
-        el("nav-4").onclick=()=>switchTab("tribe");
-        setInterval(loop,1000);
+    // --- منطق بازی ---
+    function actFarm() { if(G.dur<=0) return msg("ابزار نیاز به تعمیر دارد"); G.end.farm = now() + CFG.farm; save(); render(); }
+    function actGlean() { G.end.glean = now() + CFG.glean; save(); render(); }
+    function actRep() { G.end.rep = now() + CFG.rep; save(); render(); }
+
+    function buy(id) { 
+        let a = CFG.animals.find(x => x.id === id);
+        if(G.coins < a.c) return msg("دریک کافی نیست");
+        G.coins -= a.c; G.animals[id] = true; save(); renderHerd(); render();
+    }
+    function milk(id) { 
+        let a = CFG.animals.find(x => x.id === id);
+        if(G.bread < a.f) return msg("نان کافی نیست");
+        G.bread -= a.f; G.end[id] = now() + a.t; save(); renderHerd(); render();
+    }
+
+    function addXP(n) {
+        G.xp += n; 
+        let req = CFG.levels[Math.min(G.lvl,8)-1];
+        if(G.xp >= req && G.lvl < 8) {
+            G.xp -= req; G.lvl++; msg("ارتقا رتبه! 🎉");
+        }
+        render(); save();
+    }
+
+    // فرمول خاص خوشه‌چینی: 45% کاهش، گرد کردن به پایین‌ترین مضرب 5
+    function finGlean() {
+        G.end.glean = 0;
+        // پایه 30 است -> 30 * 0.55 = 16.5 -> floor(16.5/5)*5 = 15
+        let baseXP = 30; 
+        let reduced = baseXP * 0.55; 
+        let finalXP = Math.floor(reduced / 5) * 5; 
+        
+        addXP(finalXP);
+        if(Math.random() < 0.3) { G.bread++; msg("+۱ نان"); }
+        save(); render();
+    }
+
+    function finFarm() {
+        G.end.farm = 0; G.bread += 2; G.dur--; 
+        addXP(5); // XP معمولی کشت
+        msg("+۲ نان"); save(); render();
+    }
+    function finRep() { G.end.rep = 0; G.dur = 3; msg("ابزار بازسازی شد"); save(); render(); }
+    function finMilk(id) {
+        let a = CFG.animals.find(x => x.id === id);
+        G.end[id] = 0; G.milk += a.out; 
+        msg("شیر دوشیده شد"); renderHerd(); save(); render();
+    }
+
+    function loop() {
+        const n = now();
+        if (G.end.farm && n >= G.end.farm) finFarm();
+        else if (G.end.farm) el("t-farm").innerText = fmt(G.end.farm - n);
+
+        if (G.end.glean && n >= G.end.glean) finGlean();
+        else if (G.end.glean) el("t-glean").innerText = (G.end.glean - n) + "s";
+
+        if (G.end.rep && n >= G.end.rep) finRep();
+        else if (G.end.rep) el("t-rep").innerText = fmt(G.end.rep - n);
+
+        CFG.animals.forEach(a => {
+            if (G.end[a.id] && n >= G.end[a.id]) finMilk(a.id);
+            else if (G.end[a.id]) {
+                let e = el("tm-" + a.id);
+                if(e) e.innerText = fmt(G.end[a.id] - n);
+            }
+        });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+        // Expand Telegram WebApp
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.expand();
+            window.Telegram.WebApp.setHeaderColor('#000000');
+        }
+
+        // Load data with Cloud Sync fallback
+        load(() => {
+            render();
+            if (G.seen) el("start-modal").style.display = "none";
+        });
+
+        // Event Listeners
+        el("btn-enter").onclick = () => { G.seen = true; save(); el("start-modal").style.display = "none"; msg("خوش آمدید!"); };
+        el("btn-farm").onclick = actFarm;
+        el("btn-glean").onclick = actGlean;
+        el("btn-rep").onclick = actRep;
+        el("nav-1").onclick = () => switchTab("farm");
+        el("nav-2").onclick = () => switchTab("smith");
+        el("nav-3").onclick = () => switchTab("herd");
+        el("nav-4").onclick = () => switchTab("tribe");
+
+        setInterval(loop, 1000);
     });
     </script>
 </body>
