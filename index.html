@@ -7,7 +7,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- Base Styles --- */
+        /* --- استایل‌های اصلی --- */
         :root { 
             --bg: #000; 
             --gold: #FFD700; 
@@ -23,7 +23,7 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- Start Modal --- */
+        /* --- مودال شروع --- */
         #start-modal {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 20000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -44,9 +44,9 @@
         }
         #btn-enter:active { transform: scale(0.95); }
 
-        /* --- Header --- */
+        /* --- هدر --- */
         header { 
-            height: 130px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
+            height: 140px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
             padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
         }
         .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
@@ -70,7 +70,7 @@
             transition: width 0.3s; box-shadow: 0 0 10px #96c93d;
         }
 
-        /* --- Body --- */
+        /* --- بدنه --- */
         #game-area { flex: 1; position: relative; width: 100%; }
         
         .tab-view { 
@@ -79,7 +79,7 @@
         }
         .tab-view.active-tab { display: flex; }
 
-        /* Cards */
+        /* کارت‌ها */
         .card { 
             background: var(--glass); border: var(--glass-border); border-radius: 25px; 
             padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 25px; 
@@ -93,7 +93,7 @@
         .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(1.1); }
         .big-emoji { font-size: 8rem; display: none; filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
 
-        /* Buttons */
+        /* دکمه‌ها */
         .btn { width: 100%; padding: 22px; margin-top: 20px; border-radius: 18px; border: none; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; transition: transform 0.1s; }
         .btn:active { transform: scale(0.97); }
         
@@ -109,7 +109,7 @@
         }
         .btn.loading .timer { display: flex; }
 
-        /* --- Footer Navigation --- */
+        /* --- نوار پایین --- */
         nav { 
             height: 95px; background: rgba(10,10,10,0.95); 
             display: grid; grid-template-columns: repeat(4, 1fr); 
@@ -228,9 +228,8 @@
     <div id="toast">پیام</div>
 
     <script>
-    // --- Config ---
     const T_M = 60; 
-    const SAVE_KEY = 'PARSEH_V55_CLEAN';
+    const SAVE_KEY = 'PARSEH_V55_FINAL';
 
     const CFG = {
         farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
@@ -246,23 +245,16 @@
 
     let G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0, glean:0, rep:0}, animals:{}, seen:false, pt:0 };
 
-    // --- Helpers ---
     function el(id) { return document.getElementById(id); }
     function now() { return Math.floor(Date.now()/1000); }
     
     function save() { 
         const json = JSON.stringify(G);
-        try { localStorage.setItem(SAVE_KEY, json); } catch(e){}
-        // Cloud Sync Attempt
-        try { 
-            if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
-                window.Telegram.WebApp.CloudStorage.setItem(SAVE_KEY, json);
-            }
-        } catch(e){}
+        localStorage.setItem(SAVE_KEY, json);
+        try { if(window.Telegram?.WebApp?.CloudStorage) window.Telegram.WebApp.CloudStorage.setItem(SAVE_KEY, json); } catch(e){}
     }
     
     function load(cb) {
-        // Local Load
         let localData = localStorage.getItem(SAVE_KEY);
         if (localData) {
             try { 
@@ -271,8 +263,7 @@
                 if(!G.animals) G.animals={};
             } catch(e){}
         }
-        // Cloud Load
-        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
+        if (window.Telegram?.WebApp?.CloudStorage) {
             window.Telegram.WebApp.CloudStorage.getItem(SAVE_KEY, (err, val) => {
                 if (!err && val) {
                     try {
@@ -296,7 +287,6 @@
     }
     function fmt(s) { let m=Math.floor(s/60); let sec=s%60; return m+":"+(sec<10?"0":"")+sec; }
 
-    // --- UI Logic ---
     function render() {
         el('v-bread').innerText = G.bread;
         el('v-coin').innerText = G.coins;
@@ -324,17 +314,14 @@
     }
 
     function switchTab(n) {
-        let tabs = document.getElementsByClassName('tab-view');
-        for(let i=0; i<tabs.length; i++) tabs[i].classList.remove('active-tab');
+        document.querySelectorAll('.tab-view').forEach(x => x.classList.remove('active-tab'));
+        document.querySelectorAll('.nav-btn').forEach(x => x.classList.remove('active'));
         
-        let btns = document.getElementsByClassName('nav-btn');
-        for(let j=0; j<btns.length; j++) btns[j].classList.remove('active');
-
         let names = ['farm','smith','herd','tribe'];
-        el('view-'+names[n-1]).classList.add('active-tab');
-        el('nav-'+n).classList.add('active');
+        el("view-" + names[n-1]).classList.add('active-tab');
+        el("nav-" + n).classList.add('active');
         
-        if(n===3) renderHerd();
+        if (n === 3) renderHerd();
     }
 
     function renderHerd() {
@@ -344,26 +331,21 @@
             h += `<div class="card"><h2>${a.n}</h2>`;
             h += `<div class="img-box"><img src="images/${a.img}" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji">${a.icon}</div></div>`;
             
-            if(lock) h += `<div style="color:#ef5350; background:rgba(0,0,0,0.6); padding:10px; border-radius:10px;">قفل (رتبه ${CFG.ranks[a.lvl-1]})</div>`;
-            else if(!has) h += `<button class="btn btn-buy" id="buy-${a.id}">خرید (${a.c} دریک)</button>`;
-            else if(busy) h += `<button class="btn btn-act loading" disabled>... <div class="timer" id="tm-${a.id}" style="display:flex"></div></button>`;
+            if (lock) h += `<div style="color:#ef5350; background:rgba(0,0,0,0.6); padding:10px; border-radius:10px;">قفل (رتبه ${CFG.ranks[a.lvl-1]})</div>`;
+            else if (!has) h += `<button class="btn btn-buy" id="buy-${a.id}">خرید (${a.c} دریک)</button>`;
+            else if (busy) h += `<button class="btn btn-act loading" disabled>... <div class="timer" id="tm-${a.id}" style="display:flex"></div></button>`;
             else h += `<button class="btn btn-act" id="milk-${a.id}">دوشیدن (${a.f} نان)</button>`;
             h += `</div>`;
         });
-        el('herd-box').innerHTML = h;
+        el("herd-box").innerHTML = h;
 
-        // Dynamic Event Binding
         CFG.animals.forEach(a => {
             if(el(`buy-${a.id}`)) el(`buy-${a.id}`).onclick = () => buy(a.id);
             if(el(`milk-${a.id}`)) el(`milk-${a.id}`).onclick = () => milk(a.id);
         });
     }
 
-    // --- Game Actions ---
-    function actFarm() {
-        if(G.dur<=0) return msg("ابزار نیاز به تعمیر دارد");
-        G.end.farm = now() + CFG.farm; save(); render();
-    }
+    function actFarm() { if(G.dur<=0) return msg("ابزار نیاز به تعمیر دارد"); G.end.farm = now() + CFG.farm; save(); render(); }
     function actGlean() { G.end.glean = now() + CFG.glean; save(); render(); }
     function actRep() { G.end.rep = now() + CFG.rep; save(); render(); }
 
@@ -378,40 +360,34 @@
         G.bread -= a.f; G.end[id] = now() + a.t; save(); renderHerd(); render();
     }
 
-    // --- Logic Finishes ---
+    function finGlean() {
+        G.end.glean = 0;
+        G.xp = parseFloat((G.xp + 0.0355).toFixed(4));
+        let req = CFG.levels[Math.min(G.lvl,8)-1];
+        if(G.xp >= req && G.lvl < 8) { G.xp = 0; G.lvl++; msg("تبریک! ارتقا رتبه 🎉"); }
+        else { if(Math.random() < 0.3) { G.bread++; msg("+۱ نان"); } }
+        save(); render();
+    }
+
     function finFarm() {
         G.end.farm = 0; G.bread += 2; G.dur--; 
         addXP(5); msg("+۲ نان"); save(); render();
     }
-    function finGlean() {
-        G.end.glean = 0;
-        G.xp = parseFloat((G.xp + 0.0355).toFixed(4));
-        checkLevelUp();
-        if(Math.random() < 0.3) { G.bread++; msg("+۱ نان"); }
-        save(); render();
-    }
-    function finRep() { G.end.rep=0; G.dur=3; msg("نوسازی شد"); save(); render(); }
+    function finRep() { G.end.rep = 0; G.dur = 3; msg("ابزار بازسازی شد"); save(); render(); }
     function finMilk(id) {
-        let a = CFG.animals.find(x=>x.id==id);
-        G.end[id] = 0; G.milk += a.out; msg("شیر دوشیده شد"); save(); renderHerd(); render();
+        let a = CFG.animals.find(x => x.id === id);
+        G.end[id] = 0; G.milk += a.out; 
+        msg("شیر دوشیده شد"); renderHerd(); save(); render();
     }
 
     function addXP(n) {
         G.xp = parseFloat((G.xp + n).toFixed(4));
-        checkLevelUp();
-    }
-    function checkLevelUp() {
         let req = CFG.levels[Math.min(G.lvl,8)-1];
-        if(G.xp >= req && G.lvl < 8) {
-            G.xp = 0; G.lvl++; msg("ارتقا رتبه! 🎉");
-        }
+        if(G.xp >= req && G.lvl < 8) { G.xp = 0; G.lvl++; msg("ارتقا رتبه! 🎉"); }
     }
 
-    // --- Loop ---
     function loop() {
         const n = now();
-        
-        // Passive 5 min
         G.pt = (G.pt||0) + 1;
         if(G.pt >= 300) {
             G.pt=0;
@@ -421,1809 +397,42 @@
             }
         }
 
-        if(G.end.farm) { 
-            if(n >= G.end.farm) finFarm(); 
-            else el("t-farm").innerText = fmt(G.end.farm - n); 
-        }
-        if(G.end.glean) { 
-            if(n >= G.end.glean) finGlean(); 
-            else el("t-glean").innerText = (G.end.glean - n)+"s"; 
-        }
-        if(G.end.rep) { 
-            if(n >= G.end.rep) finRep(); 
-            else el("t-rep").innerText = fmt(G.end.rep - n); 
-        }
+        if (G.end.farm) { if(n >= G.end.farm) finFarm(); else el("t-farm").innerText = fmt(G.end.farm - n); }
+        if (G.end.glean) { if(n >= G.end.glean) finGlean(); else el("t-glean").innerText = (G.end.glean - n) + "s"; }
+        if (G.end.rep) { if(n >= G.end.rep) finRep(); else el("t-rep").innerText = fmt(G.end.rep - n); }
 
         CFG.animals.forEach(a => {
-            if(G.end[a.id]) {
+            if (G.end[a.id]) {
                 if(n >= G.end[a.id]) finMilk(a.id);
-                else {
-                    let e = el("tm-"+a.id);
-                    if(e) e.innerText = fmt(G.end[a.id]-n);
-                }
+                else { let e = el("tm-" + a.id); if(e) e.innerText = fmt(G.end[a.id] - n); }
             }
         });
         
         if(n%5===0) save();
     }
 
-    // --- Initialization ---
-    window.addEventListener('DOMContentLoaded', () => {
-        if(window.Telegram?.WebApp) {
+    window.onload = function() {
+        if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.setHeaderColor('#000000');
         }
         
         load(() => {
             render();
-            if(G.seen) el('start-modal').style.display='none';
+            if (G.seen) el("start-modal").style.display = "none";
         });
 
-        // Event Listeners (Guaranteed)
-        el('btn-enter').onclick = () => { el('start-modal').style.display='none'; G.seen=true; save(); msg("خوش آمدید"); };
-        
-        el('btn-farm').onclick = actFarm;
-        el('btn-glean').onclick = actGlean;
-        el('btn-rep').onclick = actRep;
-
-        el('nav-1').onclick = () => switchTab(1);
-        el('nav-2').onclick = () => switchTab(2);
-        el('nav-3').onclick = () => switchTab(3);
-        el('nav-4').onclick = () => switchTab(4);
+        el("btn-enter").onclick = () => { G.seen = true; save(); el("start-modal").style.display = "none"; msg("خوش آمدید!"); };
+        el("btn-farm").onclick = actFarm;
+        el("btn-glean").onclick = actGlean;
+        el("btn-rep").onclick = actRep;
+        el("nav-1").onclick = () => switchTab(1);
+        el("nav-2").onclick = () => switchTab(2);
+        el("nav-3").onclick = () => switchTab(3);
+        el("nav-4").onclick = () => switchTab(4);
 
         setInterval(loop, 1000);
-    });
+    };
     </script>
 </body>
 </html>
-            height: 140px; background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent); 
-            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
-        }
-        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
-        .pill { 
-            background: rgba(50,50,50,0.7); border: var(--border); border-radius: 15px; 
-            padding: 5px 15px; display: flex; align-items: center; gap: 10px; min-width: 90px; backdrop-filter: blur(10px);
-        }
-        .pill img { width: 35px; height: 35px; object-fit: contain; }
-        .pill span { font-weight: bold; font-size: 1.2rem; }
-        .rank-title { font-size: 1.4rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold); }
-
-        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
-        .xp-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #444; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, #00b09b, #96c93d); width: 0%; transition: width 0.3s; }
-
-        /* بدنه */
-        #game-area { flex: 1; position: relative; width: 100%; }
-        .tab-view { 
-            position: absolute; inset: 0; display: none; flex-direction: column; 
-            align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
-        }
-        /* کلاس نمایش */
-        .show-tab { display: flex !important; }
-
-        /* کارت‌ها */
-        .card { 
-            background: var(--glass); border: var(--border); border-radius: 25px; 
-            padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 25px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.5); backdrop-filter: blur(20px);
-        }
-        .img-box { width: 220px; height: 220px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%); border-radius: 50%; }
-        .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(1.1); }
-        .big-emoji { font-size: 7rem; display: none; filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
-
-        /* دکمه‌ها */
-        .btn { width: 100%; padding: 20px; margin-top: 15px; border-radius: 18px; border: none; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; }
-        .btn-act { background: linear-gradient(145deg, #3e2723, #251614); color: var(--gold); border: 1px solid #5d4037; box-shadow: 0 5px 0 #1b0e0c; }
-        .btn-act:active { transform: translateY(4px); box-shadow: 0 2px 0 #1b0e0c; }
-        .btn-act:disabled { background: #222; color: #666; box-shadow: none; transform: translateY(4px); }
-        
-        .btn-glean { background: linear-gradient(145deg, #00695c, #004d40); color: #fff; box-shadow: 0 5px 0 #00251a; }
-        .btn-buy { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: #fff; box-shadow: 0 5px 0 #0d330f; }
-
-        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 18px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.6rem; }
-        .btn.loading .timer { display: flex; }
-
-        /* نوار پایین */
-        nav { 
-            height: 95px; background: rgba(15,15,15,0.9); backdrop-filter: blur(20px);
-            display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; 
-        }
-        .nav-btn { background: none; border: none; color: #777; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; padding: 10px; }
-        .nav-btn.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,193,7,0.4); transform: scale(1.05); transition: 0.2s; }
-        .icon { font-size: 2rem; margin-bottom: 5px; }
-
-        #toast { position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%); background: rgba(20,20,20,0.95); border: 2px solid var(--gold); color: var(--gold); padding: 15px 30px; border-radius: 15px; display: none; z-index: 20000; font-size: 1.1rem; }
-    </style>
-
-    <script>
-        // --- مدیریت خطا ---
-        window.onerror = function(msg, url, line) {
-            var d = document.getElementById('debug-console');
-            d.style.display = 'block';
-            d.innerHTML += "Error: " + msg + " (Line " + line + ")<br>";
-        };
-
-        // --- تنظیمات ---
-        var T_M = 60; 
-        var SAVE_KEY = 'PARSEH_V54_ABSOLUTE';
-
-        var CFG = {
-            farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
-            animals: [
-                {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'cow.png', icon:'🐄', lvl:2},
-                {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
-                {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
-            ],
-            ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
-            levels: [100,200,330,440,555,710,1000,99999],
-            rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
-        };
-
-        var G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0, glean:0, rep:0}, animals:{}, seen:false, pt:0 };
-
-        // --- توابع کمکی ---
-        function el(id) { return document.getElementById(id); }
-        function now() { return Math.floor(Date.now()/1000); }
-        
-        function save() { 
-            try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch(e){} 
-        }
-        
-        function msg(txt) {
-            var t = el('toast'); if(t){ t.innerText=txt; t.style.display='block'; setTimeout(function(){t.style.display='none'}, 2500); }
-        }
-        function fmt(s) { var m=Math.floor(s/60); var sec=s%60; return m+":"+(sec<10?"0":"")+sec; }
-
-        // --- توابع سراسری (Global Functions) برای دکمه‌ها ---
-        
-        function startGame() {
-            el('start-overlay').style.display = 'none';
-            G.seen = true; save(); msg("به داستان خوش آمدید");
-        }
-
-        function switchTab(n) {
-            // مخفی کردن همه
-            var tabs = ['farm', 'smith', 'herd', 'tribe'];
-            for(var i=0; i<tabs.length; i++) {
-                el('view-'+tabs[i]).classList.remove('show-tab');
-                el('nav-'+(i+1)).classList.remove('active');
-            }
-            // نمایش انتخاب شده
-            el('view-'+tabs[n-1]).classList.add('show-tab');
-            el('nav-'+n).classList.add('active');
-            
-            if(n===3) renderHerd();
-        }
-
-        // --- اکشن‌ها ---
-        function actFarm() {
-            if(G.dur<=0) return msg("ابزار شکسته");
-            G.end.farm = now() + CFG.farm; save(); render();
-        }
-        function actGlean() { G.end.glean = now() + CFG.glean; save(); render(); }
-        function actRep() { G.end.rep = now() + CFG.rep; save(); render(); }
-
-        function buy(id) {
-            var a = CFG.animals.find(function(x){return x.id==id});
-            if(G.coins < a.c) return msg("دریک کافی نیست");
-            G.coins -= a.c; G.animals[id] = true; save(); renderHerd(); render();
-        }
-        function milk(id) {
-            var a = CFG.animals.find(function(x){return x.id==id});
-            if(G.bread < a.f) return msg("نان کافی نیست");
-            G.bread -= a.f; G.end[id] = now() + a.t; save(); renderHerd(); render();
-        }
-
-        // --- لاجیک پایان ---
-        function finFarm() {
-            G.end.farm = 0; G.bread += 2; G.dur--; 
-            addXP(5); msg("+۲ نان"); save(); render();
-        }
-        function finGlean() { 
-            G.end.glean=0; 
-            // 0.0355 Exact Math
-            G.xp = parseFloat((G.xp + 0.0355).toFixed(4));
-            var req = CFG.levels[Math.min(G.lvl,8)-1];
-            if(G.xp >= req && G.lvl < 8) { G.xp=0; G.lvl++; msg("ارتقا رتبه!"); }
-            else { if(Math.random()<0.3) { G.bread++; msg("+۱ نان"); } }
-            save(); render(); 
-        }
-        function finRep() { G.end.rep=0; G.dur=3; msg("نوسازی شد"); save(); render(); }
-        function finMilk(id) {
-            var a = CFG.animals.find(function(x){return x.id==id});
-            G.end[id] = 0; G.milk += a.out; msg("شیر دوشیده شد"); save(); renderHerd(); render();
-        }
-
-        function addXP(n) {
-            G.xp = parseFloat((G.xp + n).toFixed(4));
-            var req = CFG.levels[Math.min(G.lvl,8)-1];
-            if(G.xp >= req
-            transition: opacity 0.5s;
-        }
-        .modal-box {
-            width: 85%; max-width: 380px; text-align: center;
-            padding: 40px 20px;
-            background: linear-gradient(145deg, rgba(30,30,30,0.9), rgba(10,10,10,0.95));
-            border: 2px solid var(--gold); border-radius: 30px;
-            box-shadow: 0 0 80px rgba(255, 215, 0, 0.2);
-            animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .start-title { color: var(--gold); font-size: 2.2rem; margin-bottom: 15px; text-shadow: 0 0 20px var(--gold-glow); }
-        .start-desc { color: #ccc; font-size: 1rem; line-height: 1.6; margin-bottom: 30px; }
-        
-        /* دکمه شروع (تضمینی) */
-        #btn-enter {
-            background: linear-gradient(90deg, #FFC107, #FF8F00);
-            color: #000; border: none; padding: 18px 50px;
-            font-size: 1.4rem; font-weight: bold; border-radius: 50px; width: 100%;
-            cursor: pointer; box-shadow: 0 5px 25px rgba(255, 143, 0, 0.4);
-            transition: transform 0.1s;
-        }
-        #btn-enter:active { transform: scale(0.96); }
-
-        /* --- هدر (اطلاعات) --- */
-        header { 
-            height: 135px; background: linear-gradient(180deg, rgba(0,0,0,0.9), transparent); 
-            padding: 15px 20px; display: flex; flex-direction: column; justify-content: flex-end; z-index: 10;
-        }
-        .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        
-        .res-pill { 
-            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; 
-            padding: 6px 14px; display: flex; align-items: center; gap: 8px; min-width: 90px;
-            backdrop-filter: blur(10px);
-        }
-        .res-img { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 0 5px gold); }
-        .res-val { font-weight: bold; font-size: 1.1rem; text-shadow: 1px 1px 2px #000; }
-        
-        .rank-txt { font-size: 1.3rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold-glow); }
-
-        .stats-row { text-align: center; font-size: 0.85rem; color: #aaa; margin-bottom: 5px; }
-        .xp-bar-bg { width: 100%; height: 6px; background: #222; border-radius: 3px; overflow: hidden; }
-        .xp-bar-fill { height: 100%; background: linear-gradient(90deg, #00f260, #0575e6); width: 0%; transition: width 0.3s; box-shadow: 0 0 10px #0575e6; }
-
-        /* --- بدنه بازی (تب‌ها) --- */
-        #game-area { flex: 1; position: relative; width: 100%; overflow: hidden; }
-        
-        .tab-view { 
-            position: absolute; inset: 0; display: none; flex-direction: column; 
-            align-items: center; padding: 20px 20px 100px 20px; overflow-y: auto; 
-            opacity: 0; transform: scale(0.98); transition: opacity 0.3s, transform 0.3s;
-        }
-        .tab-view.active { display: flex; opacity: 1; transform: scale(1); }
-
-        /* کارت‌های شیشه‌ای */
-        .card { 
-            background: var(--glass); border: var(--glass-border); border-radius: 24px; 
-            padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(25px);
-        }
-        .card h2 { color: var(--gold); margin: 0 0 15px 0; font-size: 1.5rem; text-shadow: 0 2px 5px #000; }
-        
-        /* نگه‌دارنده تصویر (با ایموجی پیش‌فرض اگر عکس نباشد) */
-        .icon-container { 
-            width: 100%; height: 160px; display: flex; justify-content: center; align-items: center; 
-            margin-bottom: 15px; position: relative;
-        }
-        .main-img { 
-            width: 140px; height: 140px; object-fit: contain; z-index: 2; 
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.6));
-        }
-        .fallback-emoji { 
-            font-size: 6rem; position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); opacity: 0.5; z-index: 1; 
-        }
-
-        /* دکمه‌های عملیاتی */
-        .btn { 
-            width: 100%; padding: 18px; margin-top: 10px; border-radius: 16px; border: none; 
-            font-size: 1.1rem; font-weight: bold; cursor: pointer; position: relative; 
-            overflow: hidden; transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled { filter: grayscale(1); opacity: 0.6; cursor: not-allowed; }
-
-        .btn-gold { background: linear-gradient(135deg, #3E2723, #251815); color: var(--gold); border: 1px solid #5D4037; box-shadow: 0 4px 0 #1B0E0C; }
-        .btn-green { background: linear-gradient(135deg, #00695c, #004d40); color: #fff; box-shadow: 0 4px 0 #00251a; }
-        .btn-blue { background: linear-gradient(135deg, #1565C0, #0D47A1); color: #fff; box-shadow: 0 4px 0 #082E69; }
-
-        .timer-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.85); 
-            display: none; align-items: center; justify-content: center; 
-            color: var(--gold); font-family: monospace; font-size: 1.4rem;
-        }
-        .btn.loading .timer-overlay { display: flex; }
-
-        /* --- نوار پایین (Navigation) --- */
-        nav { 
-            height: 90px; background: rgba(10,10,10,0.9); 
-            display: grid; grid-template-columns: repeat(4, 1fr); 
-            border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; 
-            position: relative; backdrop-filter: blur(20px);
-        }
-        
-        /* خط طلایی متحرک */
-        #nav-line {
-            position: absolute; top: 0; left: 0; width: 25%; height: 3px;
-            background: var(--gold); box-shadow: 0 0 15px var(--gold);
-            transition: left 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-
-        .nav-item { 
-            background: none; border: none; color: #666; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            font-size: 0.8rem; font-weight: bold; transition: color 0.3s;
-        }
-        .nav-item.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,193,7,0.3); }
-        .nav-icon { font-size: 1.8rem; margin-bottom: 4px; }
-
-        /* --- پیام‌ها (Toast) --- */
-        #toast { 
-            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%) translateY(20px); 
-            background: rgba(30,30,30,0.95); border: 1px solid var(--gold); color: var(--gold); 
-            padding: 12px 25px; border-radius: 12px; opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 20000;
-            box-shadow: 0 10px 30px #000; font-weight: bold; white-space: nowrap;
-        }
-        #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-    </style>
-</head>
-<body>
-
-    <div id="start-overlay">
-        <div class="modal-box">
-            <div class="icon-container" style="height:100px;">
-                <img src="images/shovel.png" class="main-img" onerror="this.style.display='none'">
-                <div class="fallback-emoji" style="font-size:4rem;">🏛️</div>
-            </div>
-            <div class="start-title">امپراطوری پارسه</div>
-            <div class="start-desc">
-                به داستان امپراطوری بپیوندید...<br>
-                تاریخ در انتظار دستان شماست.
-            </div>
-            <button id="btn-enter">ورود به داستان</button>
-        </div>
-    </div>
-
-    <header>
-        <div class="top-row">
-            <div class="res-pill">
-                <img src="images/bread.png" class="res-img" onerror="this.style.display='none'">
-                <span id="ui-bread" class="res-val">0</span>
-            </div>
-            
-            <div id="ui-rank" class="rank-txt">برزیگر</div>
-            
-            <div class="res-pill">
-                <span id="ui-coin" class="res-val">0</span>
-                <img src="images/daric.png" class="res-img" onerror="this.style.display='none'">
-            </div>
-        </div>
-        
-        <div class="stats-row">
-            شیر: <span id="ui-milk" style="color:#fff; font-weight:bold;">0</span> | 
-            پیشرفت: <span id="ui-xp" style="color:#00f260; font-weight:bold;">0</span> بَهر
-        </div>
-        <div class="xp-bar-bg"><div id="bar-xp" class="xp-bar-fill"></div></div>
-    </header>
-
-    <div id="game-area">
-        
-        <div id="view-farm" class="tab-view active">
-            <div class="card">
-                <h2>کشتزارهای پارس</h2>
-                <div class="icon-container">
-                    <img src="images/shovel.png" class="main-img" onerror="this.style.display='none'">
-                    <div class="fallback-emoji">🌾</div>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; color:#aaa; font-size:0.9rem; margin-bottom:5px;">
-                    <span>توان ابزار</span> <span id="ui-dur">3/3</span>
-                </div>
-                <div class="xp-bar-bg" style="margin-bottom:15px;"><div id="bar-dur" class="xp-bar-fill" style="background:#ffa000;"></div></div>
-                
-                <button id="btn-farm" class="btn btn-gold">
-                    کشت (۳۵ پنگان)
-                    <div class="timer-overlay" id="t-farm">00:00</div>
-                </button>
-                <button id="btn-glean" class="btn btn-green">
-                    خوشه‌چینی (سریع)
-                    <div class="timer-overlay" id="t-glean">00:00</div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-smith" class="tab-view">
-            <div class="card">
-                <h2>آهنگرسرای کاوه</h2>
-                <div class="icon-container">
-                    <img src="images/repair.png" class="main-img" onerror="this.style.display='none'">
-                    <div class="fallback-emoji">🔥</div>
-                </div>
-                <p style="color:#ccc;">بازسازی ابزار برای ادامه کار</p>
-                <button id="btn-rep" class="btn btn-gold">
-                    بازسازی (۱۵ پنگان)
-                    <div class="timer-overlay" id="t-rep">00:00</div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-herd" class="tab-view">
-            <div id="herd-container" style="width:100%"></div>
-        </div>
-
-        <div id="view-tribe" class="tab-view">
-            <div class="card">
-                <h2>خاندان‌های پارس</h2>
-                <div class="icon-container">
-                    <div class="fallback-emoji" style="opacity:1; font-size:5rem;">🛡️</div>
-                </div>
-                <p style="color:#aaa;">این بخش به زودی در دسترس خواهد بود...</p>
-            </div>
-        </div>
-
-    </div>
-
-    <nav>
-        <div id="nav-line"></div>
-        <button id="nav-1" class="nav-item active">
-            <span class="nav-icon">🌾</span><span>کشت</span>
-        </button>
-        <button id="nav-2" class="nav-item">
-            <span class="nav-icon">🔨</span><span>آهنگری</span>
-        </button>
-        <button id="nav-3" class="nav-item">
-            <span class="nav-icon">🐏</span><span>گله</span>
-        </button>
-        <button id="nav-4" class="nav-item">
-            <span class="nav-icon">🛡️</span><span>خاندان</span>
-        </button>
-    </nav>
-
-    <div id="toast">پیام سیستم</div>
-
-    <script>
-        // --- پیکربندی ---
-        const TIME_MULT = 60; // 1 دقیقه = 60 ثانیه
-        const SAVE_KEY = 'PARSEH_EMPIRE_V100_PRO'; // کلید ذخیره نهایی
-
-        const CFG = {
-            farmT: 35 * TIME_MULT,
-            gleanT: 3,
-            repT: 15 * TIME_MULT,
-            maxDur: 3,
-            animals: [
-                {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*TIME_MULT, out:3, img:'cow.png', icon:'🐄', lvl:2},
-                {id:'sheep', n:'گوسفند', c:35, f:2, t:25*TIME_MULT, out:2, img:'sheep.png', icon:'🐑', lvl:3},
-                {id:'goat', n:'ب
-
-        /* --- مودال شروع --- */
-        #start-modal {
-            position: fixed; 
-            inset: 0; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 20000;
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-            backdrop-filter: blur(20px); 
-            -webkit-backdrop-filter: blur(20px);
-            opacity: 1;
-            transition: opacity 0.3s ease;
-        }
-        #start-modal.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        .modal-box {
-            border: 2px solid var(--gold); 
-            padding: 40px; 
-            border-radius: 35px;
-            text-align: center; 
-            width: 85%; 
-            max-width: 350px; 
-            background: rgba(20,20,20,0.95);
-            box-shadow: 0 0 80px rgba(255, 193, 7, 0.4);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-        }
-        .start-btn {
-            background: linear-gradient(135deg, #ffca28, #ff6f00); 
-            color: #000; 
-            border: none; 
-            padding: 20px 50px;
-            font-size: 1.5rem; 
-            font-weight: bold; 
-            border-radius: 50px; 
-            margin-top: 30px;
-            cursor: pointer; 
-            box-shadow: 0 0 30px var(--gold); 
-            width: 100%; 
-            display: block;
-            transition: all 0.2s ease;
-        }
-        .start-btn:active { transform: scale(0.98); }
-        .start-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-
-        /* --- هدر --- */
-        header { 
-            height: 140px; 
-            background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
-            padding: 10px 20px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            z-index: 10; 
-            position: relative;
-        }
-        .row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: flex-end; 
-            width: 100%; 
-            margin-bottom: 10px; 
-        }
-        
-        .pill { 
-            background: rgba(40,40,40,0.8); 
-            border: var(--glass-border); 
-            border-radius: 16px; 
-            padding: 8px 15px; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            min-width: 90px;
-            backdrop-filter: blur(15px); 
-            -webkit-backdrop-filter: blur(15px);
-            transition: all 0.2s ease;
-        }
-        .pill:hover { transform: translateY(-1px); }
-        .pill img { width: 35px; height: 35px; object-fit: contain; }
-        .pill span { font-weight: bold; font-size: 1.2rem; }
-        .alt-emoji { display: none; font-size: 1.5rem; }
-        
-        .rank-title { 
-            font-size: 1.4rem; 
-            color: var(--gold); 
-            font-weight: bold; 
-            text-shadow: 0 0 10px var(--gold);
-            min-width: 80px;
-            text-align: center;
-        }
-
-        .xp-con { 
-            width: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 2px; 
-            margin-top: 5px; 
-        }
-        .xp-bg { 
-            width: 100%; 
-            height: 8px; 
-            background: rgba(255,255,255,0.1); 
-            border-radius: 4px; 
-            overflow: hidden; 
-        }
-        .xp-fill { 
-            height: 100%; 
-            background: linear-gradient(90deg, #00c6ff, #0072ff); 
-            width: 0%; 
-            transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 0 10px #0072ff;
-        }
-
-        /* --- بدنه --- */
-        #game-area { 
-            flex: 1; 
-            position: relative; 
-            width: 100%; 
-            overflow: hidden;
-        }
-        
-        /* مدیریت تب‌ها */
-        .tab-view { 
-            position: absolute; 
-            inset: 0; 
-            display: none; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px; 
-            overflow-y: auto; 
-            padding-bottom: 120px; 
-            opacity: 0; 
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            transform: translateX(20px);
-        }
-        .tab-view.active-tab { 
-            display: flex; 
-            opacity: 1; 
-            transform: translateX(0);
-        }
-
-        /* کارت‌ها */
-        .card { 
-            background: var(--glass); 
-            border: var(--glass-border); 
-            border-radius: 28px; 
-            padding: 25px; 
-            width: 100%; 
-            max-width: 380px; 
-            text-align: center; 
-            margin-bottom: 25px; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-            backdrop-filter: blur(25px); 
-            -webkit-backdrop-filter: blur(25px);
-            transition: all 0.2s ease;
-        }
-        .card:hover { transform: translateY(-2px); }
-        
-        .img-box { 
-            width: 240px; 
-            height: 240px; 
-            margin: 0 auto 20px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%); 
-            border-radius: 50%;
-            overflow: hidden;
-        }
-        .card-img { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: contain; 
-            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
-            transform: scale(1.05); 
-        }
-        .big-emoji { 
-            font-size: 8rem; 
-            filter: drop-shadow(0 0 30px rgba(255,215,0,0.3)); 
-        }
-
-        /* دکمه‌ها */
-        .btn { 
-            width: 100%; 
-            padding: 22px; 
-            margin-top: 15px; 
-            border-radius: 18px; 
-            border: none; 
-            font-size: 1.3rem; 
-            font-weight: bold; 
-            cursor: pointer; 
-            position: relative; 
-            transition: all 0.2s ease;
-            overflow: hidden;
-        }
-        .btn:active { transform: scale(0.97); }
-        .btn:disabled { cursor: not-allowed; opacity: 0.6; }
-        
-        .btn-act { 
-            background: linear-gradient(145deg, #3e2723, #251614); 
-            color: var(--gold); 
-            border: 1px solid #5d4037; 
-            box-shadow: 0 5px 0 #1b0e0c; 
-        }
-        .btn-glean { 
-            background: linear-gradient(145deg, #00695c, #004d40); 
-            color: #fff; 
-            box-shadow: 0 5px 0 #00251a; 
-        }
-        .btn-buy { 
-            background: linear-gradient(145deg, #2e7d32, #1b5e20); 
-            color: #fff; 
-            box-shadow: 0 5px 0 #0d330f; 
-        }
-
-        .timer { 
-            position: absolute; 
-            inset: 0; 
-            background: rgba(0,0,0,0.9); 
-            border-radius: 18px; 
-            display: none; 
-            align-items: center; 
-            justify-content: center; 
-            color: var(--gold); 
-            font-size: 1.3rem; 
-            font-weight: bold;
-            backdrop-filter: blur(10px);
-        }
-        .btn.loading .timer { display: flex; }
-
-        /* --- نوار پایین --- */
-        nav { 
-            height: 95px; 
-            background: rgba(15,15,15,0.95); 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            border-top: 1px solid rgba(255,255,255,0.1); 
-            z-index: 50; 
-            position: relative;
-            backdrop-filter: blur(30px); 
-            -webkit-backdrop-filter: blur(30px);
-        }
-        
-        #nav-indicator {
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 25%; 
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            box-shadow: 0 0 15px var(--gold);
-            transition: left 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-            border-radius: 0 0 4px 4px;
-            z-index: 60;
-        }
-
-        .nav-btn { 
-            background: none; 
-            border: none; 
-            color: #777; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            font-size: 0.85rem; 
-            padding: 10px; 
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .nav-btn:hover { color: #ccc; }
-        .nav-btn.active { 
-            color: var(--gold); 
-            text-shadow: 0 0 10px rgba(255,193,7,0.6); 
-            transform: translateY(-3px); 
-        }
-        .icon { font-size: 2rem; margin-bottom: 5px; }
-
-        #toast { 
-            position: fixed; 
-            bottom: 120px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            background: rgba(20,20,20,0.98); 
-            border: 1px solid var(--gold); 
-            color: var(--gold); 
-            padding: 15px 30px; 
-            border-radius: 15px; 
-            display: none; 
-            z-index: 20000; 
-            white-space: nowrap; 
-            font-size: 1.1rem; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-        }
-
-        /* --- Loading Spinner --- */
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top: 3px solid var(--gold);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Error states */
-        .error-state {
-            color: #ef5350 !important;
-            background: rgba(239, 83, 80, 0.1) !important;
-            border-color: #ef5350 !important;
-        }
-    </style>
-</head>
-<body>
-
-    <div id="start-modal">
-        <div class="modal-box">
-            <img src="images/shovel.png" style="width:120px;margin-bottom:20px;" alt="شovel">
-            <div style="font-size:6rem;display:none;margin-bottom:20px;">🏛️</div>
-            
-            <h1 style="color:var(--gold);font-size:2.5rem;margin-bottom:15px;font-weight: bold;">امپراطوری پارسه</h1>
-            <p style="color:#ccc;font-size:1.1rem;line-height:1.6;margin-bottom:20px;">
-                به داستان امپراطوری بپیوندید...<br>
-                تاریخ در دستان شماست.
-            </p>
-            <button id="btn-enter" class="start-btn">ورود به داستان</button>
-        </div>
-    </div>
-
-    <header>
-        <div class="row">
-            <div class="pill">
-                <img src="images/bread.png" alt="نان" onerror="handleImageError(this)">
-                <span class="alt-emoji">🍞</span>
-                <span id="v-bread">0</span>
-            </div>
-            
-            <div class="rank-title" id="v-rank">برزیگر</div>
-            
-            <div class="pill">
-                <span id="v-coin">0</span>
-                <img src="images/daric.png" alt="دریک" onerror="handleImageError(this)">
-                <span class="alt-emoji">💰</span>
-            </div>
-        </div>
-        <div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#aaa;">
-            شیر: <span id="v-milk" style="color:#fff;font-weight:bold;">0</span> | پیشرفت: <span id="v-xp">0</span>
-        </div>
-        <div class="xp-con">
-            <div class="xp-bg">
-                <div class="xp-fill" id="bar-xp"></div>
-            </div>
-        </div>
-    </header>
-
-    <div id="game-area">
-        <div id="view-farm" class="tab-view active-tab">
-            <div class="card">
-                <h2 style="margin-top:0;">کشتزارهای پارس</h2>
-                <div class="img-box">
-                    <img src="images/shovel.png" class="card-img" alt="کشتزار" onerror="handleImageError(this)">
-                    <div class="big-emoji" style="display:none;">🌾</div>
-                </div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#aaa;font-size:0.9rem;">
-                    <span>توان</span> <span id="v-dur">3/3</span>
-                </div>
-                <div style="width:100%;height:8px;background:rgba(0,0,0,0.5);border-radius:4px;overflow:hidden;">
-                    <div id="bar-dur" style="width:100%;height:100%;background:linear-gradient(90deg,#ff9800,#f57c00);transition:width 0.3s ease;"></div>
-                </div>
-                
-                <button id="btn-farm" class="btn btn-act">
-                    <span class="btn-text">کشت (۳۵ دقیقه)</span>
-                    <div class="timer" id="t-farm">00:00</div>
-                    <div class="spinner" style="display:none;"></div>
-                </button>
-                <button id="btn-glean" class="btn btn-glean">
-                    <span class="btn-text">خوشه‌چینی (سریع)</span>
-                    <div class="timer" id="t-glean">00:00</div>
-                    <div class="spinner" style="display:none;"></div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-smith" class="tab-view">
-            <div class="card">
-                <h2 style="margin-top:0;">آهنگرسرا</h2>
-                <div class="img-box">
-                    <img src="images/repair.png" class="card-img" alt="آهنگری" onerror="handleImageError(this)">
-                    <div class="big-emoji" style="display:none;">🔥</div>
-                </div>
-                <p style="color:#aaa;margin-bottom:20px;">بازسازی ابزار</p>
-                <button id="btn-rep" class="btn btn-act">
-                    <span class="btn-text">بازسازی (۱۵ دقیقه)</span>
-                    <div class="timer" id="t-rep">00:00</div>
-                    <div class="spinner" style="display:none;"></div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-herd" class="tab-view">
-            <div id="herd-box" style="width:100%;padding:10px;"></div>
-        </div>
-
-        <div id="view-tribe" class="tab-view">
-            <div class="card">
-                <h2 style="margin-top:0;">خاندان‌ها</h2>
-                <div class="img-box">
-                    <div class="big-emoji">🛡️</div>
-                </div>
-                <p style="color:#aaa;font-size:1.1rem;">به زودی در دسترس خواهد بود...</p>
-            </div>
-        </div>
-    </div>
-
-    <nav>
-        <div id="nav-indicator"></div>
-        <button id="nav-1" class="nav-btn active" data-tab="1">
-            <span class="icon">🌾</span><br>کشت
-        </button>
-        <button id="nav-2" class="nav-btn" data-tab="2">
-            <span class="icon">🔨</span><br>آهنگری
-        </button>
-        <button id="nav-3" class="nav-btn" data-tab="3">
-            <span class="icon">🐏</span><br>گله
-        </button>
-        <button id="nav-4" class="nav-btn" data-tab="4">
-            <span class="icon">🛡️</span><br>خاندان
-        </button>
-    </nav>
-
-    <div id="toast"></div>
-
-    <script>
-        // ========== تنظیمات ==========
-        const T_M = 60; // ثانیه در دقیقه
-        const SAVE_KEY = 'PARSEH_FINAL_V60'; // ورژن جدید
-        const SAVE_INTERVAL = 5; // ذخیره هر 5 ثانیه
-
-        const CFG = {
-            farm: 35 * T_M, 
-            glean: 3, 
-            rep: 15 * T_M, 
-            maxDur: 3,
-            animals: [
-                {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'cow.png', icon:'🐄', lvl:2},
-                {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
-                {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
-            ],
-            ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
-            levels: [100,200,330,440,555,710,1000,99999],
-            rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
-        };
-
-        // ========== حالت بازی ==========
-        let G = { 
-            bread: 0, 
-            coins: 0, 
-            milk: 0, 
-            dur: 3, 
-            lvl: 1, 
-            xp: 0, 
-            end: {farm:0, glean:0, rep:0}, 
-            animals: {},
-            seen: false, 
-            pt: 0,
-            lastSave: 0
-        };
-
-        // ========== عناصر DOM ==========
-        let elements = {};
-        let timers = {};
-        let saveTimeout = null;
-        let loopInterval = null;
-
-        // ========== تابع‌های کمکی ==========
-        function el(id) { 
-            if (!elements[id]) elements[id] = document.getElementById(id);
-            return elements[id]; 
-        }
-
-        function now() { return Math.floor(Date.now() / 1000); }
-
-        function safeParse(data) {
-            try {
-                return JSON.parse(data);
-            } catch (e) {
-                console.warn('JSON parse error:', e);
-                return null;
-            }
-        }
-
-        function handleImageError(img) {
-            img.style.display = 'none';
-            let emoji = img.nextElementSibling;
-            if (emoji && emoji.classList.contains('alt-emoji')) {
-                emoji.style.display = 'inline';
-            } else if (img.parentNode.querySelector('.big-emoji')) {
-                img.parentNode.querySelector('.big-emoji').style.display = 'block';
-            }
-        }
-
-        // ========== ذخیره و بازیابی ==========
-        function save(debounce = true) {
-            try {
-                G.lastSave = now();
-                const data = JSON.stringify(G);
-                localStorage.setItem(SAVE_KEY, data);
-                
-                // ذخیره ابری تلگرام
-                if (window.Telegram?.WebApp?.CloudStorage) {
-                    window.Telegram.WebApp.CloudStorage.setItem(SAVE_KEY, data);
-                }
-            } catch (e) {
-                console.error('Save error:', e);
-            }
-
-            if (debounce && saveTimeout) clearTimeout(saveTimeout);
-        }
-
-        function load(callback) {
-            // لود از localStorage
-            const localData = localStorage.getItem(SAVE_KEY);
-            if (localData) {
-                const data = safeParse(localData);
-                if (data) {
-                    Object.assign(G, data);
-                    if (!G.animals) G.animals = {};
-                }
-            }
-
-            // لود از Cloud Storage
-            if (window.Telegram?.WebApp?.CloudStorage) {
-                window.Telegram.WebApp.CloudStorage.getItem(SAVE_KEY, (err, cloudData) => {
-                    if (!err && cloudData) {
-                        const data = safeParse(cloudData);
-                        if (data) Object.assign(G, data);
-                    }
-                    if (callback) callback();
-                });
-            } else if (callback) {
-                callback();
-            }
-        }
-
-        // ========== نمایش پیام ==========
-        function msg(text, type = 'success') {
-            const toast = el('toast');
-            toast.textContent = text;
-            toast.style.display = 'block';
-            toast.className = type === 'error' ? 'error-state' : '';
-            
-            // ویبره تلگرام
-            try {
-                if (window.Telegram?.WebApp?.HapticFeedback) {
-                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-                }
-            } catch (e) {}
-
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 2500);
-        }
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        // ========== رندر ==========
-        function render() {
-            // آمار اصلی
-            el('v-bread').textContent = G.bread;
-            el('v-coin').textContent = G.coins;
-            el('v-milk').textContent = Math.floor(G.milk);
-            el('v-rank').textContent = CFG.ranks[Math.min(G.lvl - 1, 7)];
-
-            const currentLevel = Math.min(G.lvl - 1, 7);
-            const req = CFG.levels[currentLevel] || 99999;
-            el('v-xp').textContent = `${G.xp.toFixed(2)} / ${req} بَهر`;
-            
-            const xpPercent = G.lvl >= 8 ? 100 : (G.xp / req) * 100;
-            el('bar-xp').style.width = `${xpPercent}%`;
-
-            // وضعیت ابزار
-            el('v-dur').textContent = `${G.dur}/${CFG.maxDur}`;
-            el('bar-dur').style.width = `${(G.dur / CFG.maxDur) * 100}%`;
-
-            // دکمه‌ها
-            updateButton('btn-farm', G.end.farm > 0, G.dur <= 0);
-            updateButton('btn-glean', G.end.glean > 0, false);
-            updateButton('btn-rep', G.end.rep > 0, G.dur > 0);
-        }
-
-        function updateButton(btnId, isActive, isDisabled) {
-            const btn = el(btnId);
-            const timer = el(btnId.replace('btn-', 't-'));
-            const text = btn.querySelector('.btn-text');
-            const spinner = btn.querySelector('.spinner');
-
-            if (isActive) {
-                btn.classList.add('loading');
-                btn.disabled = true;
-                const remaining = G.end[btnId.split('-')[1]] - now();
-                if (timer) timer.textContent = formatTime(remaining);
-                if (text) text.style.display = 'none';
-                if (spinner) spinner.style.display = 'inline-block';
-            } else {
-                btn.classList.remove('loading');
-                btn.disabled = isDisabled;
-                if (text) text.style.display = 'inline';
-                if (spinner) spinner.style.display = 'none';
-            }
-        }
-
-        // ========== رندر گله ==========
-        function renderHerd() {
-            let html = '';
-            CFG.animals.forEach(animal => {
-                const hasAnimal = G.animals[animal.id];
-                const isBusy = G.end[animal.id] > 0;
-                const isLocked = G.lvl < animal.lvl;
-
-                html += `
-                    <div class="card">
-                        <h2 style="margin-top:0;">${animal.n}</h2>
-                        <div class="img-box">
-                            <img src="images/${animal.img}" class="card-img" alt="${animal.n}" onerror="handleImageError(this)">
-                            <div class="big-emoji">${animal.icon}</div>
-                        </div>
-                `;
-
-                if (isLocked) {
-                    html += `<div style="color:#ef5350;background:rgba(239,83,80,0.1);padding:12px;border-radius:12px;border:1px solid rgba(239,83,80,0.3);">قفل 🔒<br>نیاز به رتبه ${CFG.ranks[animal.lvl - 1]}</div>`;
-                } else if (!hasAnimal) {
-                    html += `<button class="btn btn-buy" data-action="buy" data-id="${animal.id}">خرید (${animal.c} دریک)</button>`;
-                } else if (isBusy) {
-                    html += `
-                        <button class="btn btn-act loading" disabled>
-                            <span class="btn-text">در حال کار...</span>
-                            <div class="timer" id="tm-${animal.id}"></div>
-                            <div class="spinner"></div>
-                        </button>
-                    `;
-                } else {
-                    html += `<button class="btn btn-act" data-action="milk" data-id="${animal.id}">دوشیدن (${animal.f} نان)</button>`;
-                }
-                html += '</div>';
-            });
-
-            el('herd-box').innerHTML = html;
-
-            // Event delegation
-            el('herd-box').addEventListener('click', handleHerdAction);
-        }
-
-        function handleHerdAction(e) {
-            const btn = e.target.closest('button[data-action]');
-            if (!btn) return;
-
-            const action = btn.dataset.action;
-            const animalId = btn.dataset.id;
-            
-            if (action === 'buy') {
-                buyAnimal(animalId);
-            } else if (action === 'milk') {
-                milkAnimal(animalId);
-            }
-        }
-
-        // ========== منطق بازی ==========
-        function actFarm() {
-            if (G.dur <= 0) {
-                msg('ابزار شکسته است! به آهنگرسرا بروید', 'error');
-                return;
-            }
-            G.end.farm = now() + CFG.farm;
-            save(false);
-            render();
-        }
-
-        function actGlean() {
-            G.end.glean = now() + CFG.glean;
-            save(false);
-            render();
-        }
-
-        function actRep() {
-            if (G.dur > 0) {
-                msg('ابزار سالم است', 'error');
-                return;
-            }
-            G.end.rep = now() + CFG.rep;
-            save(false);
-            render();
-        }
-
-        function buyAnimal(id) {
-            const animal = CFG.animals.find(a => a.id === id);
-            if (!animal) return;
-
-            if (G.coins < animal.c) {
-                msg('دریک کافی نیست!', 'error');
-                return;
-            }
-
-            G.coins -= animal.c;
-            G.animals[id] = true;
-            save(false);
-            renderHerd();
-            render();
-            msg(`خرید ${animal.n} ✅`);
-        }
-
-        function milkAnimal(id) {
-            const animal = CFG.animals.find(a => a.id === id);
-            if (!animal) return;
-
-            if (G.bread < animal.f) {
-                msg('نان کافی نیست!', 'error');
-                return;
-            }
-
-            G.bread -= animal.f;
-            G.end[id] = now() + animal.t;
-            save(false);
-            renderHerd();
-            render();
-        }
-
-        function finishGlean() {
-            G.end.glean = 0;
-            G.xp = parseFloat((G.xp + 0.0355).toFixed(4));
-            
-            const currentLevel = Math.min(G.lvl - 1, 7);
-            const req = CFG.levels[currentLevel];
-            
-            if (G.xp >= req && G.lvl < 8) {
-                G.xp = 0;
-                G.lvl++;
-                msg(`تبریک! ارتقا به ${CFG.ranks[G.lvl - 1]} 🎉`);
-            } else if (Math.random() < 0.3) {
-                G.bread++;
-                msg('+۱ نان 🍞');
-            }
-            save(false);
-            render();
-        }
-
-        function finishFarm() {
-            G.end.farm = 0;
-            G.bread += 2;
-            G.dur = Math.max(0, G.dur - 1);
-            addXP(5);
-            msg('+۲ نان 🍞');
-            save(false);
-            render();
-        }
-
-        function finishRep() {
-            G.end.rep = 0;
-            G.dur = CFG.maxDur;
-            msg('ابزار نوسازی شد 🔨');
-            save(false);
-            render();
-        }
-
-        function finishMilk(id) {
-            const animal = CFG.animals.find(a => a.id === id);
-            if (!animal) return;
-
-            G.end[id] = 0;
-            G.milk += animal.out;
-            msg('شیر دوشیده شد 🥛');
-            save(false);
-            renderHerd();
-            render();
-        }
-
-        function addXP(amount) {
-            G.xp = parseFloat((G.xp + amount).toFixed(4));
-            const currentLevel = Math.min(G.lvl - 1, 7);
-            const req = CFG.levels[currentLevel];
-            
-            if (G.xp >= req && G.lvl < 8) {
-                G.xp = 0;
-                G.lvl++;
-                msg(`ارتقا به ${CFG.ranks[G.lvl - 1]}! 🎉`);
-            }
-        }
-
-        // ========== Navigation ==========
-        function switchTab(tabIndex) {
-            // حرکت انیمیشن نوار
-            el('nav-indicator').style.left = `${(tabIndex - 1) * 25}%`;
-
-            // حذف کلاس‌ها
-            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', i + 1 === tabIndex);
-            });
-
-            // تغییر تب
-            document.querySelectorAll('.tab-view').forEach(view => {
-                view.classList.remove('active-tab');
-                view.style.display = 'none';
-            });
-
-            const targetView = el(`view-${['farm', 'smith', 'herd', 'tribe'][tabIndex - 1]}`);
-            targetView.style.display = 'flex';
-            setTimeout(() => targetView.classList.add('active-tab'), 50);
-
-            if (tabIndex === 3) renderHerd();
-        }
-
-        // ========== حلقه اصلی ==========
-        function gameLoop() {
-            const currentTime = now();
-            G.pt = (G.pt || 0) + 1;
-
-            // سیستم برکت و دزدی (هر 5 دقیقه)
-            if (G.pt >= 300) {
-                G.pt = 0;
-                if (G.lvl <= 2) {
-                    G.bread++;
-                    if (G.lvl === 2) {
-                        G.xp = parseFloat((G.xp + 1).toFixed(4));
-                    }
-                    msg('برکت الهی رسید 🌟');
-                }
-                
-                // احتمال دزدی
-                const robChance = CFG.rob[Math.min(G.lvl - 1, 7)];
-                if (Math.random() < robChance && G.bread > 0) {
-                    G.bread--;
-                    msg('دزد آمد! 😤');
-                }
-            }
-
-            // بررسی تکمیل وظایف
-            if (G.end.farm && currentTime >= G.end.farm) finishFarm();
-            else if (G.end.farm) el('t-farm').textContent = formatTime(G.end.farm - currentTime);
-
-            if (G.end.glean && currentTime >= G.end.glean) finishGlean();
-            else if (G.end.glean) el('t-glean').textContent = formatTime(G.end.glean - currentTime);
-
-            if (G.end.rep && currentTime >= G.end.rep) finishRep();
-            else if (G.end.rep) el('t-rep').textContent = formatTime(G.end.rep - currentTime);
-
-            // حیوانات
-            CFG.animals.forEach(animal => {
-                if (G.end[animal.id] && currentTime >= G.end[animal.id]) {
-                    finishMilk(animal.id);
-                } else if (G.end[animal.id]) {
-                    const timerEl = el(`tm-${animal.id}`);
-                    if (timerEl) {
-                        timerEl.textContent = formatTime(G.end[animal.id] - currentTime);
-                    }
-                }
-            });
-
-            // ذخیره دوره‌ای
-            if (currentTime - G.lastSave >= SAVE_INTERVAL) {
-                save(false);
-            }
-
-            render();
-        }
-
-        // ========== راه‌اندازی ==========
-        function init() {
-            // تنظیمات تلگرام
-            if (window.Telegram?.WebApp) {
-                window.Telegram.WebApp.expand();
-                window.Telegram.WebApp.setHeaderColor('#000000');
-                window.Telegram.WebApp.MainButton.setText('امپراطوری پارسه').show();
-            }
-
-            load(() => {
-                render();
-                if (G.seen) {
-                    el('start-modal').classList.add('hidden');
-                }
-                startGameLoop();
-            });
-
-            // Event Listeners
-            el('btn-enter').addEventListener('click', () => {
-                el('start-modal').classList.add('hidden');
-                G.seen = true;
-                save();
-                msg('به امپراطوری پارسه خوش آمدید 👑');
-            });
-
-            el('btn-farm').addEventListener('click', actFarm);
-            el('btn-glean').addEventListener('click', actGlean);
-            el('btn-rep').addEventListener('click', actRep);
-
-            // Navigation
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    switchTab(parseInt(btn.dataset.tab));
-                });
-            });
-
-            renderHerd();
-        }
-
-        function startGameLoop() {
-            if (loopInterval) clearInterval(loopInterval);
-            loopInterval = setInterval(gameLoop, 1000);
-        }
-
-        // شروع بازی
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-
-        // مدیریت قطع اتصال
-        window.addEventListener('beforeunload', () => save(false));
-        window.addEventListener('pagehide', () => save(false));
-    </script>
-</body>
-</html>        header { 
-            height: 140px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
-            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
-        }
-        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
-        
-        .pill { 
-            background: rgba(60,60,60,0.8); border: 1px solid #555; border-radius: 12px; 
-            padding: 6px 15px; display: flex; align-items: center; gap: 8px; min-width: 90px; 
-        }
-        .pill img { width: 40px; height: 40px; object-fit: contain; }
-        .pill span { font-weight: bold; font-size: 1.3rem; }
-        
-        .rank-title { font-size: 1.4rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 5px var(--gold); }
-
-        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 2px; margin-top: 5px; }
-        .xp-bg { width: 100%; height: 10px; background: #222; border-radius: 5px; overflow: hidden; border: 1px solid #444; }
-        .xp-fill { height: 100%; background: linear-gradient(90deg, #00b09b, #96c93d); width: 0%; transition: width 0.3s; }
-
-        /* --- بدنه --- */
-        #game-area { flex: 1; position: relative; width: 100%; }
-        
-        .tab-view { 
-            position: absolute; inset: 0; display: none; flex-direction: column; 
-            align-items: center; padding: 20px; overflow-y: auto; padding-bottom: 120px; 
-        }
-        /* تب اول اجباراً باز است تا صفحه سفید نشود */
-        #view-farm { display: flex; }
-
-        /* کلاس فعال */
-        .active-tab { display: flex !important; }
-
-        /* کارت */
-        .card { background: var(--panel); border: 2px solid #3e2723; border-radius: 20px; padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px #000; }
-        .img-box { width: 220px; height: 220px; margin: 0 auto 20px auto; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.1), transparent 70%); border-radius: 50%; }
-        .card-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: scale(1.2); }
-        .big-emoji { font-size: 8rem; display: none; filter: drop-shadow(0 0 20px rgba(255,215,0,0.5)); }
-
-        /* دکمه‌ها */
-        .btn { width: 100%; padding: 20px; margin-top: 15px; border-radius: 15px; border: none; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; }
-        .btn-act { background: #3e2723; color: var(--gold); border: 2px solid #5d4037; box-shadow: 0 5px 0 #1b0000; }
-        .btn-act:active { transform: translateY(4px); box-shadow: 0 1px 0 #1b0000; }
-        .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: none; }
-        
-        .btn-glean { background: #004d40; color: #fff; box-shadow: 0 5px 0 #00251a; }
-        .btn-buy { background: #1b5e20; color: #fff; }
-
-        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 15px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.4rem; }
-        .btn.loading .timer { display: flex; }
-
-        /* نوار پایین */
-        nav { height: 90px; background: #0a0a0a; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid #333; z-index: 50; }
-        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
-        .nav-btn.active { color: var(--gold); background: #222; border-top: 3px solid var(--gold); }
-        .icon { font-size: 2rem; margin-bottom: 3px; }
-
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid var(--gold); color: var(--gold); padding: 15px 30px; border-radius: 15px; display: none; z-index: 20000; white-space: nowrap; font-size: 1.1rem; }
-        
-        .lock-msg { color: #ef5350; font-weight: bold; margin-top: 10px; background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 8px; display:inline-block; }
-    </style>
-</head>
-<body>
-
-    <div id="start-overlay">
-        <div class="modal-box">
-            <img src="images/shovel.png" style="width:120px; margin-bottom:20px;" onload="this.style.display='inline'" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-            <div style="font-size:6rem; display:none; margin-bottom:20px;">🏛️</div>
-            
-            <h1 style="color:var(--gold); font-size:2.5rem; margin-bottom: 15px;">امپراطوری پارسه</h1>
-            <p style="color:#ccc; font-size:1.2rem; line-height:1.6; margin-bottom: 20px;">
-                به داستان امپراطوری بپیوندید...<br>
-                تاریخ در دستان شماست.
-            </p>
-            <button id="btn-enter" class="start-btn">ورود به داستان</button>
-        </div>
-    </div>
-
-    <header>
-        <div class="row">
-            <div class="pill">
-                <img src="images/bread.png" onerror="this.style.display='none'">
-                <span id="v-bread">0</span>
-            </div>
-            <div class="rank-title" id="v-rank">برزیگر</div>
-            <div class="pill">
-                <span id="v-coin">0</span>
-                <img src="images/daric.png" onerror="this.style.display='none'">
-            </div>
-        </div>
-        <div style="text-align:center; margin-top:10px; font-size:0.9rem; color:#aaa;">
-            شیر: <span id="v-milk" style="color:#fff; font-weight:bold; font-size:1.1rem">0</span> | پیشرفت: <span id="v-xp">0 بَهر</span>
-        </div>
-        <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="bar-xp" style="width:0%;"></div></div></div>
-    </header>
-
-    <div id="game-area">
-        <div id="view-farm" class="tab-view active-tab">
-            <div class="card">
-                <h2>کشتزارهای پارس</h2>
-                <div class="img-box">
-                    <img src="images/shovel.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                    <div class="big-emoji">🌾</div>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#aaa; font-size:0.8rem;">
-                    <span>توان</span> <span id="v-dur">3/3</span>
-                </div>
-                <div style="width:100%; height:10px; background:#000; border-radius:5px;"><div id="bar-dur" style="width:100%; height:100%; background:orange;"></div></div>
-                
-                <button id="btn-farm" class="btn btn-act">
-                    کشت (۳۵ دقیقه)
-                    <div class="timer" id="t-farm">00:00</div>
-                </button>
-                <button id="btn-glean" class="btn btn-glean">
-                    خوشه‌چینی (سریع)
-                    <div class="timer" id="t-glean">00:00</div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-smith" class="tab-view">
-            <div class="card">
-                <h2>آهنگرسرا</h2>
-                <div class="img-box">
-                    <img src="images/repair.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-                    <div class="big-emoji">🔥</div>
-                </div>
-                <p style="color:#aaa;">بازسازی ابزار</p>
-                <button id="btn-rep" class="btn btn-act">
-                    بازسازی (۱۵ دقیقه)
-                    <div class="timer" id="t-rep">00:00</div>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-herd" class="tab-view">
-            <div id="herd-box" style="width:100%"></div>
-        </div>
-
-        <div id="view-tribe" class="tab-view">
-            <div class="card"><h2>خاندان‌ها</h2><div class="img-box"><div class="big-emoji" style="display:block">🛡️</div></div><p>به زودی...</p></div>
-        </div>
-    </div>
-
-    <nav>
-        <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span><br>کشت</button>
-        <button id="nav-2" class="nav-btn"><span class="icon">🔨</span><br>آهنگری</button>
-        <button id="nav-3" class="nav-btn"><span class="icon">🐏</span><br>گله</button>
-        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span><br>خاندان</button>
-    </nav>
-
-    <div id="toast">پیام</div>
-
-    <script>
-    // --- تنظیمات ---
-    const T_M = 60; 
-    const SAVE_KEY = 'PARSEH_V52_FINAL';
-
-    const CFG = {
-        farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
-        animals: [
-            {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'cow.png', icon:'🐄', lvl:2},
-            {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
-            {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
-        ],
-        ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
-        levels: [100,200,330,440,555,710,1000,99999],
-        rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
-    };
-
-    let G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0, glean:0, rep:0}, animals:{}, seen:false, pt:0 };
-
-    // --- توابع کمکی ---
-    function el(id) { return document.getElementById(id); }
-    function now() { return Math.floor(Date.now()/1000); }
-    function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(G)); } catch(e){} }
-    function msg(txt) {
-        var t = el('toast'); t.innerText=txt; t.style.display='block';
-        setTimeout(function(){t.style.display='none'}, 3000);
-    }
-    function fmt(s) { var m=Math.floor(s/60); var sec=s%60; return m+":"+(sec<10?"0":"")+sec; }
-
-    // --- شروع بازی ---
-    window.onload = function() {
-        try {
-            if(window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.expand();
-                window.Telegram.WebApp.setHeaderColor('#000000');
-            }
-            
-            var d = localStorage.getItem(SAVE_KEY);
-            if(d) {
-                var t = JSON.parse(d);
-                G = Object.assign(G, t);
-                if(!G.animals) G.animals={};
-            }
-
-            if(G.seen) el('start-overlay').style.display = 'none';
-            
-            // اتصال دکمه‌ها (تضمینی)
-            el('btn-enter').onclick = startGame;
-            el('btn-farm').onclick = actFarm;
-            el('btn-glean').onclick = actGlean;
-            el('btn-rep').onclick = actRep;
-
-            el('nav-1').onclick = function() { switchTab('farm'); };
-            el('nav-2').onclick = function() { switchTab('smith'); };
-            el('nav-3').onclick = function() { switchTab('herd'); };
-            el('nav-4').onclick = function() { switchTab('tribe'); };
-
-            render(); renderHerd();
-            setInterval(loop, 1000);
-
-        } catch(e) { 
-            // حتی اگر خطا داد، دکمه ورود کار کند
-            el('btn-enter').onclick = function() { el('start-overlay').style.display='none'; };
-            alert(e); 
-        }
-    };
-
-    function startGame() {
-        el('start-overlay').style.display = 'none';
-        G.seen = true; save(); msg("به داستان خوش آمدید");
-    }
-
-    // --- تب‌ها ---
-    function switchTab(name) {
-        // مخفی کردن همه
-        el('view-farm').style.display = 'none';
-        el('view-smith').style.display = 'none';
-        el('view-herd').style.display = 'none';
-        el('view-tribe').style.display = 'none';
-        
-        el('nav-1').classList.remove('active');
-        el('nav-2').classList.remove('active');
-        el('nav-3').classList.remove('active');
-        el('nav-4').classList.remove('active');
-
-        // نمایش
-        el('view-'+name).style.display = 'flex';
-        
-        // فعال کردن دکمه
-        var n = (name==='farm'?1:(name==='smith'?2:(name==='herd'?3:4)));
-        el('nav-'+n).classList.add('active');
-        
-        if(name==='herd') renderHerd();
-    }
-
-    // --- منطق ---
-    function actFarm() {
-        if(G.dur<=0) return msg("ابزار شکسته");
-        G.end.farm = now() + CFG.farm; save(); render();
-    }
-    function finFarm() {
-        G.end.farm = 0; G.bread += 2; G.dur--; 
-        if(Math.random()<0.3) { 
-            var req = [5,8,15,16,16,20,25,30][Math.min(G.lvl,8)-1];
-            addXP(req);
-        } else msg("+2 نان");
-        
-        if(Math.random()<0.05) { G.coins++; msg("دریک زرین!"); }
-        if(G.dur===0) msg("ابزار شکست!");
-        save(); render();
-    }
-
-    function actGlean() { G.end.glean = now() + CFG.glean; save(); render(); }
-    function finGlean() { 
-        G.end.glean=0; 
-        var baseXP = 30; var reduced = baseXP * 0.55; var finalXP = Math.floor(reduced / 5) * 5;
-        addXP(finalXP);
-        if(Math.random() < 0.3) { G.bread++; msg("+1 نان"); } 
-        save(); render(); 
-    }
-
-    function actRep() { G.end.rep = now() + CFG.rep; save(); render(); }
-    function finRep() { G.end.rep=0; G.dur=3; msg("نوسازی شد"); save(); render(); }
-
-    function buy(id) {
-        var a = CFG.animals.find(function(x){return x.id==id});
-        if(G.coins < a.c) return msg("دریک کافی نیست");
-        G.coins -= a.c; G.animals[id] = true; save(); renderHerd(); render();
-    }
-    function milk(id) {
-        var a = CFG.animals.find(function(x){return x.id==id});
-        if(G.bread < a.f) return msg("نان کافی نیست");
-        G.bread -= a.f; 
-        if(!G.end[id]) G.end[id]=0;
-        G.end[id] = now() + a.t;
-        save(); renderHerd(); render();
-    }
-    function finMilk(id) {
-        var a = CFG.animals.find(function(x){return x.id==id});
-        G.end[id] = 0; G.milk += a.out; msg("شیر دوشیده شد"); save(); renderHerd(); render();
-    }
-
-    function addXP(n) {
-        G.xp = parseFloat((G.xp + n).toFixed(4));
-        var req = CFG.levels[Math.min(G.lvl,8)-1];
-        if(G.xp >= req && G.lvl < 8) {
-            G.xp = 0; G.lvl++; msg("تبریک! ارتقا رتبه 🎉");
-        }
-    }
-
-    function render() {
-        el('v-bread').innerText = G.bread;
-        el('v-coin').innerText = G.coins;
-        el('v-milk').innerText = Math.floor(G.milk);
-        el('v-rank').innerText = CFG.ranks[Math.min(G.lvl,8)-1];
-        
-        var req = CFG.levels[Math.min(G.lvl,8)-1] || 9999;
-        var pct = (G.lvl>=8) ? 100 : Math.floor((G.xp/req)*100);
-        el('v-xp').innerText = G.xp + " / " + req + " بَهر";
-        el('bar-xp').style.width = pct + "%";
-
-        el('v-dur').innerText = G.dur + "/3";
-        el('bar-dur').style.width = (G.dur/3)*100 + "%";
-
-        var bf = el('btn-farm');
-        if(G.end.farm > 0) { bf.classList.add('loading'); bf.disabled=true; el('t-farm').innerText = fmt(G.end.farm-now()); }
-        else { bf.classList.remove('loading'); bf.disabled = G.dur<=0; }
-
-        var bg = el('btn-glean');
-        if(G.end.glean > 0) { bg.classList.add('loading'); bg.disabled=true; el('t-glean').innerText = (G.end.glean-now())+"s"; }
-        else { bg.classList.remove('loading'); bg.disabled=false; }
-
-        var br = el('btn-rep');
-        if(G.end.rep > 0) { br.classList.add('loading'); br.disabled=true; el('t-rep').innerText = fmt(G.end.rep-now()); }
-        else { br.classList.remove('loading'); br.disabled = G.dur>0; }
-    }
-
-    function renderHerd() {
-        var h = '';
-        CFG.animals.forEach(function(a){
-            var has = G.animals[a.id];
-            var busy = (G.end[a.id] || 0) > 0;
-            var lock = G.lvl < a.lvl;
-            
-            h += '<div class="card"><h2>'+a.n+'</h2>';
-            h += '<div class="img-box"><img src="images/'+a.img+'" class="card-img" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><div class="big-emoji">'+a.icon+'</div></div>';
-            
-            if(lock) h += '<div class="lock-msg">قفل (رتبه '+CFG.ranks[a.lvl-1]+')</div>';
-            else if(!has) h += '<button class="btn btn-buy" onclick="window.buy(\''+a.id+'\')">خرید ('+a.c+')</button>';
-            else if(busy) h += '<button class="btn btn-act loading" disabled>... <div class="timer" style="display:flex" id="tm-'+a.id+'"></div></button>';
-            else h += '<button class="btn btn-act" onclick="window.milk(\''+a.id+'\')">دوشیدن ('+a.f+' نان)</button>';
-            h += '</div>';
-        });
-        el('herd-box').innerHTML = h;
-    }
-
-    function loop() {
-        var n = now(); var u = false;
-        
-        G.pt++;
-        if(G.pt >= 300) {
-            G.pt=0;
-            if(G.lvl<=2) { G.bread++; if(G.lvl==2) G.xp++; msg("برکت رسید"); u=true; }
-            if(Math.random() < CFG.rob[Math.min(G.lvl,8)-1]) {
-                if(G.bread>0) { G.bread--; msg("دزد آمد!"); u=true; }
-            }
-        }
-
-        if(G.end.farm > 0) {
-            if(n >= G.end.farm) { finFarm(); u=true; }
-            else el('t-farm').innerText = fmt(G.end.farm - n);
-        }
-        if(G.end.glean > 0) {
-            if(n >= G.end.glean) { finGlean(); u=true; }
-            else el('t-glean').innerText = (G.end.glean - n)+"s";
-        }
-        if(G.end.rep > 0) {
-            if(n >= G.end.rep) { finRep(); u=true; }
-            else el('t-rep').innerText = fmt(G.end.rep - n);
-        }
-        CFG.animals.forEach(function(a){
-            if(G.end[a.id] > 0) {
-                if(n >= G.end[a.id]) { finMilk(a.id); u=true; renderHerd(); }
-                else {
-                    var e = el('tm-'+a.id);
-                    if(e) e.innerText = fmt(G.end[a.id]-n);
-                }
-            }
-        });
-
-        if(u) { save(); render(); }
-    }
-    
-    // توابع گله به window وصل شوند
-    window.buy = buy;
-    window.milk = milk;
-
-    </script>
-</body>
-</html>
-
-
-
-
