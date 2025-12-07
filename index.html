@@ -7,14 +7,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- تنظیمات گرافیکی فوق سریع (Turbo Mode) --- */
+        /* --- تنظیمات هسته --- */
         :root { 
-            --bg: #050505; 
-            --gold: #FFD700; 
-            --card-bg: #181818; /* رنگ ثابت برای حذف لگ */
+            --bg: #050505; --gold: #FFD700; 
+            --card-bg: #1a1a1a; 
             --border: 1px solid rgba(255, 215, 0, 0.2);
-            --green: #00e676; 
-            --red: #ff1744;
+            --green: #00e676; --red: #ff1744; --admin: #7c4dff;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
@@ -23,20 +21,32 @@
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
             color: #fff; font-family: 'Tahoma', sans-serif; margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
-            transform: translateZ(0); /* فعال‌سازی شتاب‌دهنده گرافیکی */
+            transform: translateZ(0);
         }
 
-        /* مودال شروع */
-        #start-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        /* مودال عمومی */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .modal-box { border: 2px solid var(--gold); padding: 30px; border-radius: 30px; text-align: center; width: 85%; max-width: 350px; background: #111; box-shadow: 0 0 40px rgba(255, 193, 7, 0.2); }
+        
         .start-btn { 
             background: linear-gradient(135deg, #FFC107, #FF8F00); 
             color: #000; border: none; padding: 20px 40px; 
             font-size: 1.5rem; font-weight: bold; border-radius: 50px; margin-top: 25px; 
             cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%; display: block;
-            pointer-events: auto; /* تضمین کلیک */
         }
         .start-btn:active { transform: scale(0.95); opacity: 0.9; }
+
+        /* --- پنل مدیریت (Admin Panel) --- */
+        #admin-modal { z-index: 30000; display: none; }
+        .admin-box { border-color: var(--admin); box-shadow: 0 0 40px rgba(124, 77, 255, 0.3); text-align: right; }
+        .admin-title { color: var(--admin); text-align: center; margin-bottom: 20px; font-size: 1.5rem; text-shadow: 0 0 10px var(--admin); }
+        
+        .admin-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .admin-input { background: #222; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 10px; width: 100px; text-align: center; font-size: 1rem; }
+        .admin-label { font-size: 0.9rem; color: #ccc; }
+        
+        .btn-admin-save { background: var(--admin); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; margin-top: 15px; cursor: pointer; }
+        .btn-admin-close { background: #333; color: #fff; border: none; padding: 10px; width: 100%; border-radius: 15px; margin-top: 10px; cursor: pointer; }
 
         /* هدر */
         header { 
@@ -51,7 +61,8 @@
         .alt-emoji { display: none; font-size: 2rem; position: absolute; left: 5px; top: 5px; }
         .pill span { font-weight: bold; font-size: 1.3rem; width: 100%; text-align: center; }
         
-        .rank-box { text-align: center; }
+        /* تریگر مخفی ادمین */
+        .rank-box { text-align: center; cursor: pointer; user-select: none; } 
         .rank-title { font-size: 1.4rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold); }
         .rank-label { font-size: 0.75rem; color: #888; margin-bottom: 2px; }
         .score-label { font-size: 0.8rem; color: var(--green); margin-top: 2px; }
@@ -60,13 +71,12 @@
         .xp-bg { width: 100%; height: 10px; background: #111; border-radius: 5px; overflow: hidden; border: 1px solid #333; }
         .xp-fill { height: 100%; background: linear-gradient(90deg, #00C6FF, #0072FF); width: 0%; transition: width 0.3s; }
 
-        /* بدنه (رفع لگ اسکرول) */
+        /* بدنه */
         #game-area { flex: 1; position: relative; width: 100%; overflow: hidden; }
         .tab-view { 
             position: absolute; inset: 0; display: none; flex-direction: column; 
             align-items: center; padding: 15px; overflow-y: auto; 
-            padding-bottom: 140px; 
-            -webkit-overflow-scrolling: touch; /* اسکرول مومنتوم در iOS */
+            padding-bottom: 140px; -webkit-overflow-scrolling: touch;
         }
         .tab-view.active-tab { display: flex; }
 
@@ -122,7 +132,7 @@
 </head>
 <body>
 
-    <div id="start-modal">
+    <div id="start-modal" class="modal-overlay">
         <div class="modal-box">
             <img src="images/shovel.png" style="width:100px; margin-bottom:20px;" onload="this.style.display='inline'" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
             <div style="font-size:5rem; display:none; margin-bottom:20px;">🏛️</div>
@@ -133,6 +143,36 @@
         </div>
     </div>
 
+    <div id="admin-modal" class="modal-overlay">
+        <div class="modal-box admin-box">
+            <h2 class="admin-title">👑 پنل خدایگان</h2>
+            
+            <div class="admin-row">
+                <span class="admin-label">سکه (دریک):</span>
+                <input id="adm-coin" type="number" class="admin-input">
+            </div>
+            <div class="admin-row">
+                <span class="admin-label">نان:</span>
+                <input id="adm-bread" type="number" class="admin-input">
+            </div>
+            <div class="admin-row">
+                <span class="admin-label">شیر:</span>
+                <input id="adm-milk" type="number" class="admin-input">
+            </div>
+            <div class="admin-row">
+                <span class="admin-label">کارآزمودگی:</span>
+                <input id="adm-xp" type="number" class="admin-input">
+            </div>
+            <div class="admin-row">
+                <span class="admin-label">رده (۱-۸):</span>
+                <input id="adm-lvl" type="number" min="1" max="8" class="admin-input">
+            </div>
+            
+            <button class="btn-admin-save" onclick="window.saveAdmin()">💾 ثبت تغییرات</button>
+            <button class="btn-admin-close" onclick="window.closeAdmin()">بستن</button>
+        </div>
+    </div>
+
     <header>
         <div class="row">
             <div class="pill">
@@ -140,7 +180,7 @@
                 <span id="em-bread" class="alt-emoji">🍞</span>
                 <span id="v-bread">۰</span>
             </div>
-            <div class="rank-box">
+            <div class="rank-box" id="rank-trigger">
                 <div class="rank-label">جایگاه</div>
                 <div class="rank-title" id="v-rank">برزیگر</div>
                 <div class="score-label">ارج: <span id="v-score">۰</span></div>
@@ -180,7 +220,6 @@
 
         <div id="view-herd" class="tab-view">
             <button id="btn-sell-milk" class="btn btn-sell" style="display:none; margin-bottom:20px;" onclick="window.toggleMarket(true)">💰 ورود به بازار 💰</button>
-            
             <div id="market-panel" style="display:none; width:100%;">
                 <div class="card" style="border-color: var(--green);">
                     <div id="merchant-face" class="merchant-box">
@@ -188,7 +227,6 @@
                     </div>
                     <h2 id="merchant-txt" style="color:var(--green)">پیشنهاد بازرگان</h2>
                     <p id="offer-txt" style="font-size:1.2rem; font-weight:bold;">بها: ۱ دریک/پیمانه</p>
-                    
                     <div id="haggle-btns">
                         <button class="btn btn-sell" onclick="window.acceptDeal()">🤝 پذیرش پیمان</button>
                         <button class="btn btn-risk" onclick="window.haggle()">🗣️ چانه‌زنی (خطر ۲۰٪)</button>
@@ -196,7 +234,6 @@
                     <button class="btn btn-act" onclick="window.toggleMarket(false)" style="margin-top:10px;">بازگشت</button>
                 </div>
             </div>
-
             <div id="herd-box" style="width:100%"></div>
         </div>
 
@@ -206,19 +243,16 @@
                 <h2 style="color:var(--red); margin-bottom:10px;">منطقه ممنوعه</h2>
                 <p style="color:#fff; line-height:1.6;">اینجا تالار بزرگان است.<br>تنها کسانی که به جایگاه <b>۳ (سرباز)</b> رسیده باشند حق ورود دارند.</p>
             </div>
-
             <div class="card">
                 <h2>سرباز جاویدان</h2>
                 <div class="img-box">
                     <img src="images/soldier.png" class="card-img" onload="this.style.display='block';this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
                     <div class="big-emoji">💂‍♂️</div>
                 </div>
-                
                 <div style="text-align:center; margin-bottom:10px;">
                     <div style="color:#aaa;">نیرومندی: <span id="s-lvl" style="color:var(--gold); font-weight:bold;">۱</span></div>
                     <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="s-bar" style="width:0%; background:var(--gold);"></div></div></div>
                 </div>
-
                 <button class="btn btn-act" onclick="window.feedSoldier()">🍖 تغذیه سرباز (۱۰ نان)</button>
                 <p style="font-size:0.8rem; color:#aaa; margin-top:10px;">سرباز نیرومند = امنیت در برابر راهزنان</p>
             </div>
@@ -241,12 +275,9 @@
     <div id="toast">پیام</div>
 
     <script>
-    // اتصال توابع به پنجره جهانی (Global Scope) برای تضمین کارکرد دکمه‌ها
     (function() {
         const T_M = 60; 
-        const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; // کلید اصلی (تغییر نکرده)
-
-        // متغیر کنترل لود شدن (قفل ایمنی)
+        const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; 
         let isGameLoaded = false;
 
         const toFarsi = (n) => {
@@ -269,17 +300,17 @@
         let defaultG = { 
             bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, 
             end:{farm:0, glean:0, rep:0}, animals:{}, seen:false, pt:0,
-            soldierLvl: 1, soldierXp: 0 
+            soldierLvl: 1, soldierXp: 0, isAdmin: false
         };
         let G = JSON.parse(JSON.stringify(defaultG));
         
         let currentPrice = 1.0;
         let isMarketMode = false;
+        let adminTapCount = 0;
 
         function el(id) { return document.getElementById(id); }
         function now() { return Math.floor(Date.now()/1000); }
         
-        // ذخیره ایمن: اگر بازی لود نشده، ذخیره نکن (جلوگیری از صفر شدن)
         function save() { 
             if (!isGameLoaded) return; 
             try { 
@@ -289,7 +320,6 @@
             } catch(e){}
         }
         
-        // لودینگ
         function load(cb) {
             let local = localStorage.getItem(SAVE_KEY);
             if(local) {
@@ -298,7 +328,7 @@
             if(window.Telegram?.WebApp?.CloudStorage) {
                 window.Telegram.WebApp.CloudStorage.getItem(SAVE_KEY, (e,v)=>{
                     if(!e && v) { try { G = {...G, ...JSON.parse(v)}; } catch(x){} }
-                    isGameLoaded = true; // باز کردن قفل ذخیره
+                    isGameLoaded = true;
                     if(cb) cb();
                 });
             } else { 
@@ -320,7 +350,43 @@
             return toFarsi((m<10?'0':'')+m+':'+(sec<10?'0':'')+sec); 
         }
 
-        // --- تعریف توابع جهانی (Window) ---
+        // --- ادمین پنل ---
+        el('rank-trigger').onclick = () => {
+            adminTapCount++;
+            if(adminTapCount >= 7) {
+                window.openAdmin();
+                adminTapCount = 0;
+            }
+        };
+
+        window.openAdmin = function() {
+            el('admin-modal').style.display = 'flex';
+            el('adm-bread').value = G.bread;
+            el('adm-coin').value = G.coins;
+            el('adm-milk').value = G.milk;
+            el('adm-xp').value = G.xp;
+            el('adm-lvl').value = G.lvl;
+        };
+
+        window.saveAdmin = function() {
+            G.bread = parseInt(el('adm-bread').value) || 0;
+            G.coins = parseInt(el('adm-coin').value) || 0;
+            G.milk = parseFloat(el('adm-milk').value) || 0;
+            G.xp = parseFloat(el('adm-xp').value) || 0;
+            G.lvl = parseInt(el('adm-lvl').value) || 1;
+            G.dur = 3; // تعمیر ابزار
+            G.isAdmin = true; // ثبت حالت ادمین
+            save();
+            render();
+            msg("فرمان اجرا شد، سرورم! 👑");
+            el('admin-modal').style.display = 'none';
+        };
+
+        window.closeAdmin = function() {
+            el('admin-modal').style.display = 'none';
+        };
+
+        // --- توابع عمومی ---
         window.startGame = function() { 
             el('start-modal').style.display='none'; 
             G.seen = true; 
@@ -516,7 +582,7 @@
             if(n%5===0) save();
         }
 
-        // شروع خودکار پس از لود صفحه
+        // --- شروع پس از لود کامل دام (DOM) ---
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.setHeaderColor('#000000');
@@ -531,3 +597,4 @@
     </script>
 </body>
 </html>
+
