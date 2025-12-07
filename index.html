@@ -7,12 +7,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- تنظیمات بهینه و سریع --- */
+        /* --- تنظیمات گرافیکی فوق سریع (Turbo Mode) --- */
         :root { 
-            --bg: #050505; --gold: #FFD700; 
-            --card-bg: #1a1a1a; 
-            --border: 1px solid rgba(255, 215, 0, 0.15);
-            --green: #00e676; --red: #ff1744;
+            --bg: #050505; 
+            --gold: #FFD700; 
+            --card-bg: #181818; /* رنگ ثابت برای حذف لگ */
+            --border: 1px solid rgba(255, 215, 0, 0.2);
+            --green: #00e676; 
+            --red: #ff1744;
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
@@ -21,110 +23,113 @@
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
             color: #fff; font-family: 'Tahoma', sans-serif; margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
-            transform: translateZ(0);
+            transform: translateZ(0); /* فعال‌سازی شتاب‌دهنده گرافیکی */
         }
 
         /* مودال شروع */
         #start-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 20000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .modal-box { border: 2px solid var(--gold); padding: 40px; border-radius: 40px; text-align: center; width: 85%; max-width: 350px; background: #111; box-shadow: 0 0 50px rgba(255, 193, 7, 0.3); }
+        .modal-box { border: 2px solid var(--gold); padding: 30px; border-radius: 30px; text-align: center; width: 85%; max-width: 350px; background: #111; box-shadow: 0 0 40px rgba(255, 193, 7, 0.2); }
         .start-btn { 
             background: linear-gradient(135deg, #FFC107, #FF8F00); 
-            color: #000; border: none; padding: 22px 50px; 
-            font-size: 1.6rem; font-weight: bold; border-radius: 50px; margin-top: 30px; 
-            cursor: pointer; box-shadow: 0 0 30px var(--gold); width: 100%; display: block;
+            color: #000; border: none; padding: 20px 40px; 
+            font-size: 1.5rem; font-weight: bold; border-radius: 50px; margin-top: 25px; 
+            cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%; display: block;
+            pointer-events: auto; /* تضمین کلیک */
         }
-        .start-btn:active { transform: scale(0.95); }
+        .start-btn:active { transform: scale(0.95); opacity: 0.9; }
 
         /* هدر */
         header { 
-            height: 165px; background: rgba(0,0,0,0.9); 
-            padding: 10px 25px; display: flex; flex-direction: column; justify-content: center; z-index:10;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            height: 160px; background: #0a0a0a; 
+            padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 15px; }
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 10px; }
         
-        .pill { background: #222; border: var(--border); border-radius: 30px; padding: 8px 15px 8px 45px; display: flex; align-items: center; position: relative; min-width: 110px; height: 50px; }
-        .pill img { width: 65px; height: 65px; position: absolute; left: -15px; top: -10px; object-fit: contain; z-index: 2; }
+        .pill { background: #222; border: var(--border); border-radius: 30px; padding: 8px 15px 8px 45px; display: flex; align-items: center; position: relative; min-width: 100px; height: 45px; }
+        .pill img { width: 60px; height: 60px; position: absolute; left: -12px; top: -8px; object-fit: contain; z-index: 2; }
         .alt-emoji { display: none; font-size: 2rem; position: absolute; left: 5px; top: 5px; }
-        .pill span { font-weight: bold; font-size: 1.4rem; width: 100%; text-align: center; }
+        .pill span { font-weight: bold; font-size: 1.3rem; width: 100%; text-align: center; }
         
         .rank-box { text-align: center; }
-        .rank-title { font-size: 1.5rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold); }
-        .rank-label { font-size: 0.8rem; color: #888; margin-bottom: 2px; }
-        .score-label { font-size: 0.85rem; color: var(--green); margin-top: 2px; }
+        .rank-title { font-size: 1.4rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 10px var(--gold); }
+        .rank-label { font-size: 0.75rem; color: #888; margin-bottom: 2px; }
+        .score-label { font-size: 0.8rem; color: var(--green); margin-top: 2px; }
 
-        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
-        .xp-bg { width: 100%; height: 12px; background: #111; border-radius: 6px; overflow: hidden; border: 1px solid #333; }
+        .xp-con { width: 100%; display: flex; flex-direction: column; gap: 4px; margin-top: 5px; }
+        .xp-bg { width: 100%; height: 10px; background: #111; border-radius: 5px; overflow: hidden; border: 1px solid #333; }
         .xp-fill { height: 100%; background: linear-gradient(90deg, #00C6FF, #0072FF); width: 0%; transition: width 0.3s; }
 
-        /* بدنه */
+        /* بدنه (رفع لگ اسکرول) */
         #game-area { flex: 1; position: relative; width: 100%; overflow: hidden; }
         .tab-view { 
             position: absolute; inset: 0; display: none; flex-direction: column; 
-            align-items: center; padding: 20px; overflow-y: auto; 
-            padding-bottom: 150px; -webkit-overflow-scrolling: touch;
+            align-items: center; padding: 15px; overflow-y: auto; 
+            padding-bottom: 140px; 
+            -webkit-overflow-scrolling: touch; /* اسکرول مومنتوم در iOS */
         }
         .tab-view.active-tab { display: flex; }
 
         /* کارت‌ها */
         .card { 
-            background: var(--card-bg); border: var(--border); border-radius: 30px; 
-            padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 25px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+            background: var(--card-bg); border: var(--border); border-radius: 25px; 
+            padding: 20px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5); position: relative;
         }
-        .img-box { width: 200px; height: 200px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.05), transparent 70%); border-radius: 50%; }
+        .img-box { width: 180px; height: 180px; margin: 0 auto 15px; display: flex; justify-content: center; align-items: center; background: radial-gradient(circle, rgba(255,215,0,0.05), transparent 70%); border-radius: 50%; }
         .card-img { width: 100%; height: 100%; object-fit: contain; }
-        .big-emoji { font-size: 8rem; display: none; }
+        .big-emoji { font-size: 7rem; display: none; }
 
         /* دکمه‌ها */
-        .btn { width: 100%; padding: 20px; margin-top: 15px; border-radius: 18px; border: none; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; display: block; }
+        .btn { width: 100%; padding: 18px; margin-top: 12px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; position: relative; display: block; transition: 0.1s; }
         .btn:active { transform: scale(0.97); }
-        .btn-act { background: linear-gradient(145deg, #3e2723, #251614); color: var(--gold); border: 1px solid #5d4037; box-shadow: 0 5px 0 #1b0e0c; }
-        .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: translateY(5px); border-color: #333; }
-        .btn-glean { background: linear-gradient(145deg, #00695c, #004d40); color: #fff; box-shadow: 0 5px 0 #00251a; }
-        .btn-buy { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: #fff; box-shadow: 0 5px 0 #0d330f; }
-        .btn-sell { background: linear-gradient(145deg, #1b5e20, #00e676); color: #000; box-shadow: 0 5px 0 #00600f; }
-        .btn-risk { background: linear-gradient(145deg, #d32f2f, #ff1744); color: #fff; box-shadow: 0 5px 0 #b71c1c; }
-        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 18px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.6rem; }
+        .btn-act { background: linear-gradient(145deg, #3e2723, #251614); color: var(--gold); border: 1px solid #5d4037; }
+        .btn-act:disabled { background: #222; color: #555; transform: none; border-color: #333; }
+        .btn-glean { background: linear-gradient(145deg, #00695c, #004d40); color: #fff; }
+        .btn-buy { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: #fff; }
+        .btn-sell { background: linear-gradient(145deg, #1b5e20, #00e676); color: #000; }
+        .btn-risk { background: linear-gradient(145deg, #d32f2f, #ff1744); color: #fff; }
+        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.85); border-radius: 15px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.4rem; }
         .btn.loading .timer { display: flex; }
 
         /* تاجر */
-        .merchant-box { width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--gold); margin: 0 auto 15px; overflow: hidden; background: #000; }
+        .merchant-box { width: 130px; height: 130px; border-radius: 50%; border: 3px solid var(--gold); margin: 0 auto 15px; overflow: hidden; background: #000; }
         .merchant-img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
         .merchant-happy .merchant-img { filter: brightness(1.2) sepia(0.5); transform: scale(1.1); }
         .merchant-angry .merchant-img { filter: sepia(1) hue-rotate(-50deg) contrast(1.5); transform: scale(0.9) rotate(-5deg); }
 
         /* نوار پایین */
         nav { 
-            height: 90px; background: #111; 
+            height: 85px; background: #111; 
             display: grid; grid-template-columns: repeat(4, 1fr); 
             border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; 
             position: relative; 
         }
         #nav-indicator { position: absolute; top: 0; right: 0; width: 25%; height: 3px; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: right 0.3s ease-out; }
-        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.85rem; padding: 5px; height: 100%; }
+        .nav-btn { background: none; border: none; color: #666; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem; padding: 5px; height: 100%; }
         .nav-btn.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,193,7,0.5); }
         
-        .icon-container { transition: transform 0.6s; transform-style: preserve-3d; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .icon-container { transition: transform 0.5s; transform-style: preserve-3d; display: flex; flex-direction: column; align-items: center; width: 100%; }
         .nav-btn.market-mode .icon-container { transform: rotateY(180deg); }
         .icon-front, .icon-back { backface-visibility: hidden; width: 100%; text-align: center; }
         .icon-back { position: absolute; top: 0; left: 0; transform: rotateY(180deg); color: var(--green); }
-        .icon { font-size: 1.8rem; margin-bottom: 4px; display: block; }
+        .icon { font-size: 1.6rem; margin-bottom: 4px; display: block; }
 
-        .lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; border-radius: 30px; text-align: center; padding: 20px; }
-        #toast { position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%); background: #222; border: 2px solid var(--gold); color: var(--gold); padding: 12px 25px; border-radius: 15px; display: none; z-index: 20000; white-space: nowrap; font-size: 1rem; }
-        .lock-msg { color: var(--red); font-weight: bold; background: rgba(0,0,0,0.8); padding: 8px 15px; border-radius: 10px; display:inline-block; }
+        .lock-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; border-radius: 25px; text-align: center; padding: 20px; }
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #222; border: 2px solid var(--gold); color: var(--gold); padding: 10px 20px; border-radius: 15px; display: none; z-index: 20000; white-space: nowrap; font-size: 0.9rem; }
+        .lock-msg { color: var(--red); font-weight: bold; background: rgba(0,0,0,0.8); padding: 5px 10px; border-radius: 8px; display:inline-block; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <div id="start-modal">
         <div class="modal-box">
-            <img src="images/shovel.png" style="width:120px; margin-bottom:20px;" onload="this.style.display='inline'" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-            <div style="font-size:6rem; display:none; margin-bottom:20px;">🏛️</div>
-            <h1 style="color:var(--gold); font-size:2.2rem; margin-bottom: 15px;">امپراطوری پارسه</h1>
-            <p style="color:#ccc; font-size:1.1rem; line-height:1.6; margin-bottom: 20px;">به داستان امپراطوری بپیوندید...<br>تاریخ در دستان شماست.</p>
-            <button id="btn-enter" class="start-btn">ورود به داستان</button>
+            <img src="images/shovel.png" style="width:100px; margin-bottom:20px;" onload="this.style.display='inline'" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
+            <div style="font-size:5rem; display:none; margin-bottom:20px;">🏛️</div>
+            
+            <h1 style="color:var(--gold); font-size:1.8rem; margin-bottom: 15px;">امپراطوری پارسه</h1>
+            <p style="color:#ccc; font-size:1rem; line-height:1.6; margin-bottom: 20px;">به داستان امپراطوری بپیوندید...<br>تاریخ در دستان شماست.</p>
+            <button id="btn-enter" class="start-btn" onclick="window.startGame()">ورود به داستان</button>
         </div>
     </div>
 
@@ -146,7 +151,7 @@
                 <span id="v-coin">۰</span>
             </div>
         </div>
-        <div style="text-align:center; margin-top:5px; font-size:0.95rem; color:#aaa;">
+        <div style="text-align:center; font-size:0.9rem; color:#aaa;">
             شیر: <span id="v-milk" style="color:#fff; font-weight:bold;">۰</span> | کارآزمودگی: <span id="v-xp">۰ بَهر</span>
         </div>
         <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="bar-xp" style="width:0%;"></div></div></div>
@@ -157,10 +162,10 @@
             <div class="card">
                 <h2>کشتزارهای پارس</h2>
                 <div class="img-box"><img src="images/shovel.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji">🌾</div></div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#aaa; font-size:1rem;"><span>توان ابزار</span> <span id="v-dur">۳/۳</span></div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:5px; color:#aaa; font-size:0.9rem;"><span>توان ابزار</span> <span id="v-dur">۳/۳</span></div>
                 <div style="width:100%; height:8px; background:#000; border-radius:5px; margin-bottom:15px;"><div id="bar-dur" style="width:100%; height:100%; background:orange;"></div></div>
-                <button id="btn-farm" class="btn btn-act">کشت (۳۵ دقیقه)<div class="timer" id="t-farm">۰۰:۰۰</div></button>
-                <button id="btn-glean" class="btn btn-glean">خوشه‌چینی (سریع)<div class="timer" id="t-glean">۰۰:۰۰</div></button>
+                <button id="btn-farm" class="btn btn-act" onclick="window.actFarm()">کشت (۳۵ دقیقه)<div class="timer" id="t-farm">۰۰:۰۰</div></button>
+                <button id="btn-glean" class="btn btn-glean" onclick="window.actGlean()">خوشه‌چینی (سریع)<div class="timer" id="t-glean">۰۰:۰۰</div></button>
             </div>
         </div>
 
@@ -169,12 +174,12 @@
                 <h2>آهنگرسرا</h2>
                 <div class="img-box"><img src="images/repair.png" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji">🔥</div></div>
                 <p style="color:#aaa;">بازسازی ابزار فرسوده</p>
-                <button id="btn-rep" class="btn btn-act">بازسازی (۱۵ دقیقه)<div class="timer" id="t-rep">۰۰:۰۰</div></button>
+                <button id="btn-rep" class="btn btn-act" onclick="window.actRep()">بازسازی (۱۵ دقیقه)<div class="timer" id="t-rep">۰۰:۰۰</div></button>
             </div>
         </div>
 
         <div id="view-herd" class="tab-view">
-            <button id="btn-sell-milk" class="btn btn-sell" style="display:none; margin-bottom:20px;">💰 ورود به بازار 💰</button>
+            <button id="btn-sell-milk" class="btn btn-sell" style="display:none; margin-bottom:20px;" onclick="window.toggleMarket(true)">💰 ورود به بازار 💰</button>
             
             <div id="market-panel" style="display:none; width:100%;">
                 <div class="card" style="border-color: var(--green);">
@@ -185,10 +190,10 @@
                     <p id="offer-txt" style="font-size:1.2rem; font-weight:bold;">بها: ۱ دریک/پیمانه</p>
                     
                     <div id="haggle-btns">
-                        <button class="btn btn-sell" id="btn-accept">🤝 پذیرش پیمان</button>
-                        <button class="btn btn-risk" id="btn-haggle">🗣️ چانه‌زنی (خطر ۲۰٪)</button>
+                        <button class="btn btn-sell" onclick="window.acceptDeal()">🤝 پذیرش پیمان</button>
+                        <button class="btn btn-risk" onclick="window.haggle()">🗣️ چانه‌زنی (خطر ۲۰٪)</button>
                     </div>
-                    <button class="btn btn-act" id="btn-back-herd" style="margin-top:10px;">بازگشت</button>
+                    <button class="btn btn-act" onclick="window.toggleMarket(false)" style="margin-top:10px;">بازگشت</button>
                 </div>
             </div>
 
@@ -214,7 +219,7 @@
                     <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="s-bar" style="width:0%; background:var(--gold);"></div></div></div>
                 </div>
 
-                <button class="btn btn-act" id="btn-feed">🍖 تغذیه سرباز (۱۰ نان)</button>
+                <button class="btn btn-act" onclick="window.feedSoldier()">🍖 تغذیه سرباز (۱۰ نان)</button>
                 <p style="font-size:0.8rem; color:#aaa; margin-top:10px;">سرباز نیرومند = امنیت در برابر راهزنان</p>
             </div>
         </div>
@@ -222,24 +227,27 @@
 
     <nav>
         <div id="nav-indicator"></div>
-        <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span><br>کشت</button>
-        <button id="nav-2" class="nav-btn"><span class="icon">🔨</span><br>آهنگری</button>
-        <button id="nav-3" class="nav-btn">
+        <button id="nav-1" class="nav-btn active" onclick="window.switchTab(1)"><span class="icon">🌾</span><br>کشت</button>
+        <button id="nav-2" class="nav-btn" onclick="window.switchTab(2)"><span class="icon">🔨</span><br>آهنگری</button>
+        <button id="nav-3" class="nav-btn" onclick="window.switchTab(3)">
             <div class="icon-container">
                 <div class="icon-front"><span class="icon">🐏</span><br>گله</div>
                 <div class="icon-back"><span class="icon">⚖️</span><br>بازار</div>
             </div>
         </button>
-        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span><br>خاندان</button>
+        <button id="nav-4" class="nav-btn" onclick="window.switchTab(4)"><span class="icon">🛡️</span><br>خاندان</button>
     </nav>
 
     <div id="toast">پیام</div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- تنظیمات حیاتی ---
+    // اتصال توابع به پنجره جهانی (Global Scope) برای تضمین کارکرد دکمه‌ها
+    (function() {
         const T_M = 60; 
-        const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; 
+        const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; // کلید اصلی (تغییر نکرده)
+
+        // متغیر کنترل لود شدن (قفل ایمنی)
+        let isGameLoaded = false;
 
         const toFarsi = (n) => {
             if(isNaN(n)) return '۰';
@@ -268,11 +276,12 @@
         let currentPrice = 1.0;
         let isMarketMode = false;
 
-        // --- توابع کمکی ---
-        const el = (id) => document.getElementById(id);
-        const now = () => Math.floor(Date.now()/1000);
+        function el(id) { return document.getElementById(id); }
+        function now() { return Math.floor(Date.now()/1000); }
         
+        // ذخیره ایمن: اگر بازی لود نشده، ذخیره نکن (جلوگیری از صفر شدن)
         function save() { 
+            if (!isGameLoaded) return; 
             try { 
                 const json = JSON.stringify(G);
                 localStorage.setItem(SAVE_KEY, json); 
@@ -280,6 +289,7 @@
             } catch(e){}
         }
         
+        // لودینگ
         function load(cb) {
             let local = localStorage.getItem(SAVE_KEY);
             if(local) {
@@ -288,9 +298,13 @@
             if(window.Telegram?.WebApp?.CloudStorage) {
                 window.Telegram.WebApp.CloudStorage.getItem(SAVE_KEY, (e,v)=>{
                     if(!e && v) { try { G = {...G, ...JSON.parse(v)}; } catch(x){} }
+                    isGameLoaded = true; // باز کردن قفل ذخیره
                     if(cb) cb();
                 });
-            } else { if(cb) cb(); }
+            } else { 
+                isGameLoaded = true;
+                if(cb) cb(); 
+            }
         }
 
         function msg(txt) {
@@ -306,8 +320,15 @@
             return toFarsi((m<10?'0':'')+m+':'+(sec<10?'0':'')+sec); 
         }
 
-        // --- منطق بازار ---
-        function toggleMarket(show) {
+        // --- تعریف توابع جهانی (Window) ---
+        window.startGame = function() { 
+            el('start-modal').style.display='none'; 
+            G.seen = true; 
+            save(); 
+            msg("خوش آمدید"); 
+        };
+
+        window.toggleMarket = function(show) {
             isMarketMode = show;
             const btn = el('nav-3');
             if(show) {
@@ -323,7 +344,7 @@
                 el('market-panel').style.display = 'none';
                 if(G.milk > 0) el('btn-sell-milk').style.display = 'block';
             }
-        }
+        };
 
         function updateMerchantUI(state) {
             const box = el('merchant-face');
@@ -345,7 +366,7 @@
             el('offer-txt').innerText = `بها: ${toFarsi(currentPrice.toFixed(1))} دریک`;
         }
 
-        function haggle() {
+        window.haggle = function() {
             if(Math.random() > 0.5) {
                 currentPrice += 0.2;
                 updateMerchantUI('happy');
@@ -356,23 +377,23 @@
                 msg("خراب کردید! بها سقوط کرد.");
                 el('haggle-btns').style.display = 'none';
                 setTimeout(() => {
-                    if(confirm("می‌فروشید یا می‌روید؟")) acceptDeal();
-                    else toggleMarket(false);
+                    if(confirm("می‌فروشید یا می‌روید؟")) window.acceptDeal();
+                    else window.toggleMarket(false);
                 }, 1000);
             }
-        }
+        };
 
-        function acceptDeal() {
+        window.acceptDeal = function() {
             if(G.milk <= 0) return;
             let income = Math.floor(G.milk * currentPrice);
             G.coins += income;
             G.milk = 0;
             msg(`داد و ستد شد! +${toFarsi(income)} دریک`);
-            save(); render(); toggleMarket(false);
+            save(); render(); window.toggleMarket(false);
             el('haggle-btns').style.display = 'block';
-        }
+        };
 
-        function feedSoldier() {
+        window.feedSoldier = function() {
             if(G.bread < 10) return msg("نان کافی نیست (۱۰ عدد)");
             G.bread -= 10;
             G.soldierXp += 10;
@@ -384,52 +405,34 @@
                 msg("سرباز تغذیه شد");
             }
             save(); render();
-        }
+        };
 
-        // --- اکشن‌ها ---
-        function actFarm() { if(G.dur<=0)return msg("ابزار فرسوده است"); G.end.farm=now()+CFG.farm; save(); render(); }
-        function actGlean() { G.end.glean=now()+CFG.glean; save(); render(); }
-        function actRep() { G.end.rep=now()+CFG.rep; save(); render(); }
+        window.actFarm = function() { if(G.dur<=0)return msg("ابزار فرسوده است"); G.end.farm=now()+CFG.farm; save(); render(); };
+        window.actGlean = function() { G.end.glean=now()+CFG.glean; save(); render(); };
+        window.actRep = function() { G.end.rep=now()+CFG.rep; save(); render(); };
         
-        function buy(id) {
+        window.buy = function(id) {
             let a=CFG.animals.find(x=>x.id==id);
             if(G.coins<a.c) return msg("دریک کافی نیست");
             G.coins-=a.c; G.animals[id]=true; save(); renderHerd(); render();
-        }
-        function milk(id) {
+        };
+        window.milk = function(id) {
             let a=CFG.animals.find(x=>x.id==id);
             if(G.bread<a.f) return msg("نان کافی نیست");
             G.bread-=a.f; G.end[id]=now()+a.t; save(); renderHerd(); render();
-        }
+        };
 
-        function startGame() { 
-            el('start-modal').style.display='none'; 
-            G.seen=true; 
-            save(); 
-            msg("خوش آمدید"); 
-        }
-
-        function switchTab(n) {
-            if(n !== 3 && isMarketMode) toggleMarket(false);
-            
+        window.switchTab = function(n) {
+            if(n !== 3 && isMarketMode) window.toggleMarket(false);
             el('nav-indicator').style.right = ((n-1)*25)+"%";
             document.querySelectorAll('.tab-view').forEach(x=>x.classList.remove('active-tab'));
             document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-            
             let names=['farm','smith','herd','tribe'];
             el("view-"+names[n-1]).classList.add('active-tab');
             el("nav-"+n).classList.add('active');
-            
-            if(n===3) {
-                renderHerd();
-                if(G.milk > 0) el('btn-sell-milk').style.display = 'block';
-                else el('btn-sell-milk').style.display = 'none';
-            }
-            if(n===4) {
-                checkClanLock();
-                renderSoldier();
-            }
-        }
+            if(n===3) { renderHerd(); if(G.milk > 0) el('btn-sell-milk').style.display = 'block'; else el('btn-sell-milk').style.display = 'none'; }
+            if(n===4) { checkClanLock(); renderSoldier(); }
+        };
 
         function checkClanLock() {
             if (G.lvl < 3) el('clan-lock').style.display = 'flex';
@@ -480,18 +483,12 @@
                 h+=`<div class="card"><h2>${a.n}</h2>
                 <div class="img-box"><img src="images/${a.img}" class="card-img" onload="this.style.display='block';this.nextElementSibling.style.display='none'" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji" style="display:none">${a.icon}</div></div>
                 ${lock ? `<div class="lock-msg">قفل (جایگاه ${CFG.ranks[a.lvl-1]})</div>` : 
-                  !has ? `<button class="btn btn-buy" id="buy-${a.id}">خرید (${toFarsi(a.c)} دریک)</button>` : 
+                  !has ? `<button class="btn btn-buy" onclick="window.buy('${a.id}')">خرید (${toFarsi(a.c)} دریک)</button>` : 
                   busy ? `<button class="btn btn-act loading" disabled>... <div class="timer" style="display:flex" id="tm-${a.id}">${fmt(G.end[a.id]-now())}</div></button>` : 
-                  `<button class="btn btn-act" id="milk-${a.id}">دوشیدن (${toFarsi(a.f)} نان)</button>`}
+                  `<button class="btn btn-act" onclick="window.milk('${a.id}')">دوشیدن (${toFarsi(a.f)} نان)</button>`}
                 </div>`;
             });
             el("herd-box").innerHTML = h;
-            
-            // اتصال رویدادها
-            CFG.animals.forEach(a => {
-                if(el('buy-'+a.id)) el('buy-'+a.id).onclick = () => buy(a.id);
-                if(el('milk-'+a.id)) el('milk-'+a.id).onclick = () => milk(a.id);
-            });
         }
 
         function loop() {
@@ -519,7 +516,7 @@
             if(n%5===0) save();
         }
 
-        // --- شروع ---
+        // شروع خودکار پس از لود صفحه
         if (window.Telegram?.WebApp) {
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.setHeaderColor('#000000');
@@ -530,22 +527,7 @@
             render(); renderHerd(); setInterval(loop,1000); 
         });
 
-        // اتصال دکمه‌های ثابت
-        el("btn-enter").addEventListener('click', startGame);
-        el("btn-farm").addEventListener('click', actFarm);
-        el("btn-glean").addEventListener('click', actGlean);
-        el("btn-rep").addEventListener('click', actRep);
-        el("btn-sell-milk").addEventListener('click', () => toggleMarket(true));
-        el("btn-accept").addEventListener('click', acceptDeal);
-        el("btn-haggle").addEventListener('click', haggle);
-        el("btn-back-herd").addEventListener('click', () => toggleMarket(false));
-        el("btn-feed").addEventListener('click', feedSoldier);
-
-        el("nav-1").onclick=()=>switchTab(1); 
-        el("nav-2").onclick=()=>switchTab(2); 
-        el("nav-3").onclick=()=>switchTab(3); 
-        el("nav-4").onclick=()=>switchTab(4);
-    });
+    })();
     </script>
 </body>
 </html>
