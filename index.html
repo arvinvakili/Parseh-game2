@@ -7,34 +7,970 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- تنظیمات اصلی --- */
-        :root { --bg: #050505; --gold: #ffc107; --panel: rgba(30,30,30,0.98); }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
+        /* --- تنظیمات پایه --- */
+        :root { 
+            --bg: #000; 
+            --gold: #ffc107; 
+            --glass: rgba(30, 30, 30, 0.60); 
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
+            touch-action: manipulation; 
+            -webkit-touch-callout: none;
+        }
         
         body {
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
-            color: #fff; font-family: 'Tahoma', serif; margin: 0; height: 100vh;
-            display: flex; flex-direction: column; overflow: hidden;
+            color: #fff; 
+            font-family: 'Tahoma', 'Vazir', -apple-system, sans-serif; 
+            margin: 0; 
+            height: 100vh;
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* --- مودال شروع (همیشه باز است مگر بسته شود) --- */
-        #start-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 10000;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        /* --- مودال شروع --- */
+        #start-modal {
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.9); 
+            z-index: 20000;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(20px); 
+            -webkit-backdrop-filter: blur(20px);
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        #start-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
         .modal-box {
-            border: 2px solid var(--gold); padding: 40px; border-radius: 30px;
-            text-align: center; width: 85%; max-width: 350px; background: #111;
-            box-shadow: 0 0 50px rgba(255, 193, 7, 0.4);
+            border: 2px solid var(--gold); 
+            padding: 40px; 
+            border-radius: 35px;
+            text-align: center; 
+            width: 85%; 
+            max-width: 350px; 
+            background: rgba(20,20,20,0.95);
+            box-shadow: 0 0 80px rgba(255, 193, 7, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
         .start-btn {
-            background: var(--gold); color: #000; border: none; padding: 20px 50px;
-            font-size: 1.5rem; font-weight: bold; border-radius: 50px; margin-top: 30px;
-            cursor: pointer; box-shadow: 0 0 20px var(--gold); width: 100%; display: block;
+            background: linear-gradient(135deg, #ffca28, #ff6f00); 
+            color: #000; 
+            border: none; 
+            padding: 20px 50px;
+            font-size: 1.5rem; 
+            font-weight: bold; 
+            border-radius: 50px; 
+            margin-top: 30px;
+            cursor: pointer; 
+            box-shadow: 0 0 30px var(--gold); 
+            width: 100%; 
+            display: block;
+            transition: all 0.2s ease;
         }
+        .start-btn:active { transform: scale(0.98); }
+        .start-btn:disabled { opacity: 0.7; cursor: not-allowed; }
 
         /* --- هدر --- */
         header { 
+            height: 140px; 
+            background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
+            padding: 10px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            z-index: 10; 
+            position: relative;
+        }
+        .row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            width: 100%; 
+            margin-bottom: 10px; 
+        }
+        
+        .pill { 
+            background: rgba(40,40,40,0.8); 
+            border: var(--glass-border); 
+            border-radius: 16px; 
+            padding: 8px 15px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            min-width: 90px;
+            backdrop-filter: blur(15px); 
+            -webkit-backdrop-filter: blur(15px);
+            transition: all 0.2s ease;
+        }
+        .pill:hover { transform: translateY(-1px); }
+        .pill img { width: 35px; height: 35px; object-fit: contain; }
+        .pill span { font-weight: bold; font-size: 1.2rem; }
+        .alt-emoji { display: none; font-size: 1.5rem; }
+        
+        .rank-title { 
+            font-size: 1.4rem; 
+            color: var(--gold); 
+            font-weight: bold; 
+            text-shadow: 0 0 10px var(--gold);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .xp-con { 
+            width: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 2px; 
+            margin-top: 5px; 
+        }
+        .xp-bg { 
+            width: 100%; 
+            height: 8px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 4px; 
+            overflow: hidden; 
+        }
+        .xp-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #00c6ff, #0072ff); 
+            width: 0%; 
+            transition: width 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 0 10px #0072ff;
+        }
+
+        /* --- بدنه --- */
+        #game-area { 
+            flex: 1; 
+            position: relative; 
+            width: 100%; 
+            overflow: hidden;
+        }
+        
+        /* مدیریت تب‌ها */
+        .tab-view { 
+            position: absolute; 
+            inset: 0; 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 20px; 
+            overflow-y: auto; 
+            padding-bottom: 120px; 
+            opacity: 0; 
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateX(20px);
+        }
+        .tab-view.active-tab { 
+            display: flex; 
+            opacity: 1; 
+            transform: translateX(0);
+        }
+
+        /* کارت‌ها */
+        .card { 
+            background: var(--glass); 
+            border: var(--glass-border); 
+            border-radius: 28px; 
+            padding: 25px; 
+            width: 100%; 
+            max-width: 380px; 
+            text-align: center; 
+            margin-bottom: 25px; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+            backdrop-filter: blur(25px); 
+            -webkit-backdrop-filter: blur(25px);
+            transition: all 0.2s ease;
+        }
+        .card:hover { transform: translateY(-2px); }
+        
+        .img-box { 
+            width: 240px; 
+            height: 240px; 
+            margin: 0 auto 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%); 
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .card-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; 
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); 
+            transform: scale(1.05); 
+        }
+        .big-emoji { 
+            font-size: 8rem; 
+            filter: drop-shadow(0 0 30px rgba(255,215,0,0.3)); 
+        }
+
+        /* دکمه‌ها */
+        .btn { 
+            width: 100%; 
+            padding: 22px; 
+            margin-top: 15px; 
+            border-radius: 18px; 
+            border: none; 
+            font-size: 1.3rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            position: relative; 
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        
+        .btn-act { 
+            background: linear-gradient(145deg, #3e2723, #251614); 
+            color: var(--gold); 
+            border: 1px solid #5d4037; 
+            box-shadow: 0 5px 0 #1b0e0c; 
+        }
+        .btn-glean { 
+            background: linear-gradient(145deg, #00695c, #004d40); 
+            color: #fff; 
+            box-shadow: 0 5px 0 #00251a; 
+        }
+        .btn-buy { 
+            background: linear-gradient(145deg, #2e7d32, #1b5e20); 
+            color: #fff; 
+            box-shadow: 0 5px 0 #0d330f; 
+        }
+
+        .timer { 
+            position: absolute; 
+            inset: 0; 
+            background: rgba(0,0,0,0.9); 
+            border-radius: 18px; 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--gold); 
+            font-size: 1.3rem; 
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+        .btn.loading .timer { display: flex; }
+
+        /* --- نوار پایین --- */
+        nav { 
+            height: 95px; 
+            background: rgba(15,15,15,0.95); 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            border-top: 1px solid rgba(255,255,255,0.1); 
+            z-index: 50; 
+            position: relative;
+            backdrop-filter: blur(30px); 
+            -webkit-backdrop-filter: blur(30px);
+        }
+        
+        #nav-indicator {
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 25%; 
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            box-shadow: 0 0 15px var(--gold);
+            transition: left 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border-radius: 0 0 4px 4px;
+            z-index: 60;
+        }
+
+        .nav-btn { 
+            background: none; 
+            border: none; 
+            color: #777; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            font-size: 0.85rem; 
+            padding: 10px; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-btn:hover { color: #ccc; }
+        .nav-btn.active { 
+            color: var(--gold); 
+            text-shadow: 0 0 10px rgba(255,193,7,0.6); 
+            transform: translateY(-3px); 
+        }
+        .icon { font-size: 2rem; margin-bottom: 5px; }
+
+        #toast { 
+            position: fixed; 
+            bottom: 120px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: rgba(20,20,20,0.98); 
+            border: 1px solid var(--gold); 
+            color: var(--gold); 
+            padding: 15px 30px; 
+            border-radius: 15px; 
+            display: none; 
+            z-index: 20000; 
+            white-space: nowrap; 
+            font-size: 1.1rem; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        /* --- Loading Spinner --- */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error states */
+        .error-state {
+            color: #ef5350 !important;
+            background: rgba(239, 83, 80, 0.1) !important;
+            border-color: #ef5350 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="start-modal">
+        <div class="modal-box">
+            <img src="images/shovel.png" style="width:120px;margin-bottom:20px;" alt="شovel">
+            <div style="font-size:6rem;display:none;margin-bottom:20px;">🏛️</div>
+            
+            <h1 style="color:var(--gold);font-size:2.5rem;margin-bottom:15px;font-weight: bold;">امپراطوری پارسه</h1>
+            <p style="color:#ccc;font-size:1.1rem;line-height:1.6;margin-bottom:20px;">
+                به داستان امپراطوری بپیوندید...<br>
+                تاریخ در دستان شماست.
+            </p>
+            <button id="btn-enter" class="start-btn">ورود به داستان</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="row">
+            <div class="pill">
+                <img src="images/bread.png" alt="نان" onerror="handleImageError(this)">
+                <span class="alt-emoji">🍞</span>
+                <span id="v-bread">0</span>
+            </div>
+            
+            <div class="rank-title" id="v-rank">برزیگر</div>
+            
+            <div class="pill">
+                <span id="v-coin">0</span>
+                <img src="images/daric.png" alt="دریک" onerror="handleImageError(this)">
+                <span class="alt-emoji">💰</span>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:10px;font-size:0.9rem;color:#aaa;">
+            شیر: <span id="v-milk" style="color:#fff;font-weight:bold;">0</span> | پیشرفت: <span id="v-xp">0</span>
+        </div>
+        <div class="xp-con">
+            <div class="xp-bg">
+                <div class="xp-fill" id="bar-xp"></div>
+            </div>
+        </div>
+    </header>
+
+    <div id="game-area">
+        <div id="view-farm" class="tab-view active-tab">
+            <div class="card">
+                <h2 style="margin-top:0;">کشتزارهای پارس</h2>
+                <div class="img-box">
+                    <img src="images/shovel.png" class="card-img" alt="کشتزار" onerror="handleImageError(this)">
+                    <div class="big-emoji" style="display:none;">🌾</div>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:5px;color:#aaa;font-size:0.9rem;">
+                    <span>توان</span> <span id="v-dur">3/3</span>
+                </div>
+                <div style="width:100%;height:8px;background:rgba(0,0,0,0.5);border-radius:4px;overflow:hidden;">
+                    <div id="bar-dur" style="width:100%;height:100%;background:linear-gradient(90deg,#ff9800,#f57c00);transition:width 0.3s ease;"></div>
+                </div>
+                
+                <button id="btn-farm" class="btn btn-act">
+                    <span class="btn-text">کشت (۳۵ دقیقه)</span>
+                    <div class="timer" id="t-farm">00:00</div>
+                    <div class="spinner" style="display:none;"></div>
+                </button>
+                <button id="btn-glean" class="btn btn-glean">
+                    <span class="btn-text">خوشه‌چینی (سریع)</span>
+                    <div class="timer" id="t-glean">00:00</div>
+                    <div class="spinner" style="display:none;"></div>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-smith" class="tab-view">
+            <div class="card">
+                <h2 style="margin-top:0;">آهنگرسرا</h2>
+                <div class="img-box">
+                    <img src="images/repair.png" class="card-img" alt="آهنگری" onerror="handleImageError(this)">
+                    <div class="big-emoji" style="display:none;">🔥</div>
+                </div>
+                <p style="color:#aaa;margin-bottom:20px;">بازسازی ابزار</p>
+                <button id="btn-rep" class="btn btn-act">
+                    <span class="btn-text">بازسازی (۱۵ دقیقه)</span>
+                    <div class="timer" id="t-rep">00:00</div>
+                    <div class="spinner" style="display:none;"></div>
+                </button>
+            </div>
+        </div>
+
+        <div id="view-herd" class="tab-view">
+            <div id="herd-box" style="width:100%;padding:10px;"></div>
+        </div>
+
+        <div id="view-tribe" class="tab-view">
+            <div class="card">
+                <h2 style="margin-top:0;">خاندان‌ها</h2>
+                <div class="img-box">
+                    <div class="big-emoji">🛡️</div>
+                </div>
+                <p style="color:#aaa;font-size:1.1rem;">به زودی در دسترس خواهد بود...</p>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div id="nav-indicator"></div>
+        <button id="nav-1" class="nav-btn active" data-tab="1">
+            <span class="icon">🌾</span><br>کشت
+        </button>
+        <button id="nav-2" class="nav-btn" data-tab="2">
+            <span class="icon">🔨</span><br>آهنگری
+        </button>
+        <button id="nav-3" class="nav-btn" data-tab="3">
+            <span class="icon">🐏</span><br>گله
+        </button>
+        <button id="nav-4" class="nav-btn" data-tab="4">
+            <span class="icon">🛡️</span><br>خاندان
+        </button>
+    </nav>
+
+    <div id="toast"></div>
+
+    <script>
+        // ========== تنظیمات ==========
+        const T_M = 60; // ثانیه در دقیقه
+        const SAVE_KEY = 'PARSEH_FINAL_V60'; // ورژن جدید
+        const SAVE_INTERVAL = 5; // ذخیره هر 5 ثانیه
+
+        const CFG = {
+            farm: 35 * T_M, 
+            glean: 3, 
+            rep: 15 * T_M, 
+            maxDur: 3,
+            animals: [
+                {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'cow.png', icon:'🐄', lvl:2},
+                {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
+                {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
+            ],
+            ranks: ["برزیگر","دِهبان","سرباز","سردسته","فرمانده","ساتراپ","وزیر","شاهنشاه"],
+            levels: [100,200,330,440,555,710,1000,99999],
+            rob: [0.01,0.025,0.045,0.05,0.05,0.075,0.081,0.09]
+        };
+
+        // ========== حالت بازی ==========
+        let G = { 
+            bread: 0, 
+            coins: 0, 
+            milk: 0, 
+            dur: 3, 
+            lvl: 1, 
+            xp: 0, 
+            end: {farm:0, glean:0, rep:0}, 
+            animals: {},
+            seen: false, 
+            pt: 0,
+            lastSave: 0
+        };
+
+        // ========== عناصر DOM ==========
+        let elements = {};
+        let timers = {};
+        let saveTimeout = null;
+        let loopInterval = null;
+
+        // ========== تابع‌های کمکی ==========
+        function el(id) { 
+            if (!elements[id]) elements[id] = document.getElementById(id);
+            return elements[id]; 
+        }
+
+        function now() { return Math.floor(Date.now() / 1000); }
+
+        function safeParse(data) {
+            try {
+                return JSON.parse(data);
+            } catch (e) {
+                console.warn('JSON parse error:', e);
+                return null;
+            }
+        }
+
+        function handleImageError(img) {
+            img.style.display = 'none';
+            let emoji = img.nextElementSibling;
+            if (emoji && emoji.classList.contains('alt-emoji')) {
+                emoji.style.display = 'inline';
+            } else if (img.parentNode.querySelector('.big-emoji')) {
+                img.parentNode.querySelector('.big-emoji').style.display = 'block';
+            }
+        }
+
+        // ========== ذخیره و بازیابی ==========
+        function save(debounce = true) {
+            try {
+                G.lastSave = now();
+                const data = JSON.stringify(G);
+                localStorage.setItem(SAVE_KEY, data);
+                
+                // ذخیره ابری تلگرام
+                if (window.Telegram?.WebApp?.CloudStorage) {
+                    window.Telegram.WebApp.CloudStorage.setItem(SAVE_KEY, data);
+                }
+            } catch (e) {
+                console.error('Save error:', e);
+            }
+
+            if (debounce && saveTimeout) clearTimeout(saveTimeout);
+        }
+
+        function load(callback) {
+            // لود از localStorage
+            const localData = localStorage.getItem(SAVE_KEY);
+            if (localData) {
+                const data = safeParse(localData);
+                if (data) {
+                    Object.assign(G, data);
+                    if (!G.animals) G.animals = {};
+                }
+            }
+
+            // لود از Cloud Storage
+            if (window.Telegram?.WebApp?.CloudStorage) {
+                window.Telegram.WebApp.CloudStorage.getItem(SAVE_KEY, (err, cloudData) => {
+                    if (!err && cloudData) {
+                        const data = safeParse(cloudData);
+                        if (data) Object.assign(G, data);
+                    }
+                    if (callback) callback();
+                });
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        // ========== نمایش پیام ==========
+        function msg(text, type = 'success') {
+            const toast = el('toast');
+            toast.textContent = text;
+            toast.style.display = 'block';
+            toast.className = type === 'error' ? 'error-state' : '';
+            
+            // ویبره تلگرام
+            try {
+                if (window.Telegram?.WebApp?.HapticFeedback) {
+                    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+                }
+            } catch (e) {}
+
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // ========== رندر ==========
+        function render() {
+            // آمار اصلی
+            el('v-bread').textContent = G.bread;
+            el('v-coin').textContent = G.coins;
+            el('v-milk').textContent = Math.floor(G.milk);
+            el('v-rank').textContent = CFG.ranks[Math.min(G.lvl - 1, 7)];
+
+            const currentLevel = Math.min(G.lvl - 1, 7);
+            const req = CFG.levels[currentLevel] || 99999;
+            el('v-xp').textContent = `${G.xp.toFixed(2)} / ${req} بَهر`;
+            
+            const xpPercent = G.lvl >= 8 ? 100 : (G.xp / req) * 100;
+            el('bar-xp').style.width = `${xpPercent}%`;
+
+            // وضعیت ابزار
+            el('v-dur').textContent = `${G.dur}/${CFG.maxDur}`;
+            el('bar-dur').style.width = `${(G.dur / CFG.maxDur) * 100}%`;
+
+            // دکمه‌ها
+            updateButton('btn-farm', G.end.farm > 0, G.dur <= 0);
+            updateButton('btn-glean', G.end.glean > 0, false);
+            updateButton('btn-rep', G.end.rep > 0, G.dur > 0);
+        }
+
+        function updateButton(btnId, isActive, isDisabled) {
+            const btn = el(btnId);
+            const timer = el(btnId.replace('btn-', 't-'));
+            const text = btn.querySelector('.btn-text');
+            const spinner = btn.querySelector('.spinner');
+
+            if (isActive) {
+                btn.classList.add('loading');
+                btn.disabled = true;
+                const remaining = G.end[btnId.split('-')[1]] - now();
+                if (timer) timer.textContent = formatTime(remaining);
+                if (text) text.style.display = 'none';
+                if (spinner) spinner.style.display = 'inline-block';
+            } else {
+                btn.classList.remove('loading');
+                btn.disabled = isDisabled;
+                if (text) text.style.display = 'inline';
+                if (spinner) spinner.style.display = 'none';
+            }
+        }
+
+        // ========== رندر گله ==========
+        function renderHerd() {
+            let html = '';
+            CFG.animals.forEach(animal => {
+                const hasAnimal = G.animals[animal.id];
+                const isBusy = G.end[animal.id] > 0;
+                const isLocked = G.lvl < animal.lvl;
+
+                html += `
+                    <div class="card">
+                        <h2 style="margin-top:0;">${animal.n}</h2>
+                        <div class="img-box">
+                            <img src="images/${animal.img}" class="card-img" alt="${animal.n}" onerror="handleImageError(this)">
+                            <div class="big-emoji">${animal.icon}</div>
+                        </div>
+                `;
+
+                if (isLocked) {
+                    html += `<div style="color:#ef5350;background:rgba(239,83,80,0.1);padding:12px;border-radius:12px;border:1px solid rgba(239,83,80,0.3);">قفل 🔒<br>نیاز به رتبه ${CFG.ranks[animal.lvl - 1]}</div>`;
+                } else if (!hasAnimal) {
+                    html += `<button class="btn btn-buy" data-action="buy" data-id="${animal.id}">خرید (${animal.c} دریک)</button>`;
+                } else if (isBusy) {
+                    html += `
+                        <button class="btn btn-act loading" disabled>
+                            <span class="btn-text">در حال کار...</span>
+                            <div class="timer" id="tm-${animal.id}"></div>
+                            <div class="spinner"></div>
+                        </button>
+                    `;
+                } else {
+                    html += `<button class="btn btn-act" data-action="milk" data-id="${animal.id}">دوشیدن (${animal.f} نان)</button>`;
+                }
+                html += '</div>';
+            });
+
+            el('herd-box').innerHTML = html;
+
+            // Event delegation
+            el('herd-box').addEventListener('click', handleHerdAction);
+        }
+
+        function handleHerdAction(e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+
+            const action = btn.dataset.action;
+            const animalId = btn.dataset.id;
+            
+            if (action === 'buy') {
+                buyAnimal(animalId);
+            } else if (action === 'milk') {
+                milkAnimal(animalId);
+            }
+        }
+
+        // ========== منطق بازی ==========
+        function actFarm() {
+            if (G.dur <= 0) {
+                msg('ابزار شکسته است! به آهنگرسرا بروید', 'error');
+                return;
+            }
+            G.end.farm = now() + CFG.farm;
+            save(false);
+            render();
+        }
+
+        function actGlean() {
+            G.end.glean = now() + CFG.glean;
+            save(false);
+            render();
+        }
+
+        function actRep() {
+            if (G.dur > 0) {
+                msg('ابزار سالم است', 'error');
+                return;
+            }
+            G.end.rep = now() + CFG.rep;
+            save(false);
+            render();
+        }
+
+        function buyAnimal(id) {
+            const animal = CFG.animals.find(a => a.id === id);
+            if (!animal) return;
+
+            if (G.coins < animal.c) {
+                msg('دریک کافی نیست!', 'error');
+                return;
+            }
+
+            G.coins -= animal.c;
+            G.animals[id] = true;
+            save(false);
+            renderHerd();
+            render();
+            msg(`خرید ${animal.n} ✅`);
+        }
+
+        function milkAnimal(id) {
+            const animal = CFG.animals.find(a => a.id === id);
+            if (!animal) return;
+
+            if (G.bread < animal.f) {
+                msg('نان کافی نیست!', 'error');
+                return;
+            }
+
+            G.bread -= animal.f;
+            G.end[id] = now() + animal.t;
+            save(false);
+            renderHerd();
+            render();
+        }
+
+        function finishGlean() {
+            G.end.glean = 0;
+            G.xp = parseFloat((G.xp + 0.0355).toFixed(4));
+            
+            const currentLevel = Math.min(G.lvl - 1, 7);
+            const req = CFG.levels[currentLevel];
+            
+            if (G.xp >= req && G.lvl < 8) {
+                G.xp = 0;
+                G.lvl++;
+                msg(`تبریک! ارتقا به ${CFG.ranks[G.lvl - 1]} 🎉`);
+            } else if (Math.random() < 0.3) {
+                G.bread++;
+                msg('+۱ نان 🍞');
+            }
+            save(false);
+            render();
+        }
+
+        function finishFarm() {
+            G.end.farm = 0;
+            G.bread += 2;
+            G.dur = Math.max(0, G.dur - 1);
+            addXP(5);
+            msg('+۲ نان 🍞');
+            save(false);
+            render();
+        }
+
+        function finishRep() {
+            G.end.rep = 0;
+            G.dur = CFG.maxDur;
+            msg('ابزار نوسازی شد 🔨');
+            save(false);
+            render();
+        }
+
+        function finishMilk(id) {
+            const animal = CFG.animals.find(a => a.id === id);
+            if (!animal) return;
+
+            G.end[id] = 0;
+            G.milk += animal.out;
+            msg('شیر دوشیده شد 🥛');
+            save(false);
+            renderHerd();
+            render();
+        }
+
+        function addXP(amount) {
+            G.xp = parseFloat((G.xp + amount).toFixed(4));
+            const currentLevel = Math.min(G.lvl - 1, 7);
+            const req = CFG.levels[currentLevel];
+            
+            if (G.xp >= req && G.lvl < 8) {
+                G.xp = 0;
+                G.lvl++;
+                msg(`ارتقا به ${CFG.ranks[G.lvl - 1]}! 🎉`);
+            }
+        }
+
+        // ========== Navigation ==========
+        function switchTab(tabIndex) {
+            // حرکت انیمیشن نوار
+            el('nav-indicator').style.left = `${(tabIndex - 1) * 25}%`;
+
+            // حذف کلاس‌ها
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i + 1 === tabIndex);
+            });
+
+            // تغییر تب
+            document.querySelectorAll('.tab-view').forEach(view => {
+                view.classList.remove('active-tab');
+                view.style.display = 'none';
+            });
+
+            const targetView = el(`view-${['farm', 'smith', 'herd', 'tribe'][tabIndex - 1]}`);
+            targetView.style.display = 'flex';
+            setTimeout(() => targetView.classList.add('active-tab'), 50);
+
+            if (tabIndex === 3) renderHerd();
+        }
+
+        // ========== حلقه اصلی ==========
+        function gameLoop() {
+            const currentTime = now();
+            G.pt = (G.pt || 0) + 1;
+
+            // سیستم برکت و دزدی (هر 5 دقیقه)
+            if (G.pt >= 300) {
+                G.pt = 0;
+                if (G.lvl <= 2) {
+                    G.bread++;
+                    if (G.lvl === 2) {
+                        G.xp = parseFloat((G.xp + 1).toFixed(4));
+                    }
+                    msg('برکت الهی رسید 🌟');
+                }
+                
+                // احتمال دزدی
+                const robChance = CFG.rob[Math.min(G.lvl - 1, 7)];
+                if (Math.random() < robChance && G.bread > 0) {
+                    G.bread--;
+                    msg('دزد آمد! 😤');
+                }
+            }
+
+            // بررسی تکمیل وظایف
+            if (G.end.farm && currentTime >= G.end.farm) finishFarm();
+            else if (G.end.farm) el('t-farm').textContent = formatTime(G.end.farm - currentTime);
+
+            if (G.end.glean && currentTime >= G.end.glean) finishGlean();
+            else if (G.end.glean) el('t-glean').textContent = formatTime(G.end.glean - currentTime);
+
+            if (G.end.rep && currentTime >= G.end.rep) finishRep();
+            else if (G.end.rep) el('t-rep').textContent = formatTime(G.end.rep - currentTime);
+
+            // حیوانات
+            CFG.animals.forEach(animal => {
+                if (G.end[animal.id] && currentTime >= G.end[animal.id]) {
+                    finishMilk(animal.id);
+                } else if (G.end[animal.id]) {
+                    const timerEl = el(`tm-${animal.id}`);
+                    if (timerEl) {
+                        timerEl.textContent = formatTime(G.end[animal.id] - currentTime);
+                    }
+                }
+            });
+
+            // ذخیره دوره‌ای
+            if (currentTime - G.lastSave >= SAVE_INTERVAL) {
+                save(false);
+            }
+
+            render();
+        }
+
+        // ========== راه‌اندازی ==========
+        function init() {
+            // تنظیمات تلگرام
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.setHeaderColor('#000000');
+                window.Telegram.WebApp.MainButton.setText('امپراطوری پارسه').show();
+            }
+
+            load(() => {
+                render();
+                if (G.seen) {
+                    el('start-modal').classList.add('hidden');
+                }
+                startGameLoop();
+            });
+
+            // Event Listeners
+            el('btn-enter').addEventListener('click', () => {
+                el('start-modal').classList.add('hidden');
+                G.seen = true;
+                save();
+                msg('به امپراطوری پارسه خوش آمدید 👑');
+            });
+
+            el('btn-farm').addEventListener('click', actFarm);
+            el('btn-glean').addEventListener('click', actGlean);
+            el('btn-rep').addEventListener('click', actRep);
+
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTab(parseInt(btn.dataset.tab));
+                });
+            });
+
+            renderHerd();
+        }
+
+        function startGameLoop() {
+            if (loopInterval) clearInterval(loopInterval);
+            loopInterval = setInterval(gameLoop, 1000);
+        }
+
+        // شروع بازی
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        // مدیریت قطع اتصال
+        window.addEventListener('beforeunload', () => save(false));
+        window.addEventListener('pagehide', () => save(false));
+    </script>
+</body>
+</html>        header { 
             height: 140px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
             padding: 10px 20px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
         }
@@ -426,3 +1362,4 @@
     </script>
 </body>
 </html>
+
