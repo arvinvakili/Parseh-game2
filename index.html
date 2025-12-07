@@ -7,12 +7,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- تنظیمات هسته --- */
+        /* --- تنظیمات بهینه شده (High Performance) --- */
         :root { 
             --bg: #000; 
             --gold: #FFD700; 
-            --glass: rgba(30, 30, 30, 0.75); 
-            --glass-border: 1px solid rgba(255, 255, 255, 0.15);
+            /* شیشه سبک برای کارت‌ها (بدون بلور سنگین برای رفع لگ) */
+            --card-bg: rgba(30, 30, 30, 0.92); 
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; touch-action: manipulation; }
@@ -21,77 +22,84 @@
             background: #000 url('images/bg.png') center/cover no-repeat fixed;
             color: #fff; font-family: 'Tahoma', sans-serif; margin: 0; height: 100vh;
             display: flex; flex-direction: column; overflow: hidden;
+            /* جلوگیری از پرش تصویر در اسکرول */
+            transform: translateZ(0); 
         }
 
         /* --- مودال شروع --- */
         #start-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 20000;
+            position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 20000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            backdrop-filter: blur(15px);
+            /* بلور فقط اینجا باشد چون ثابت است */
+            backdrop-filter: blur(10px);
         }
         .modal-box {
-            border: 2px solid var(--gold); padding: 40px; border-radius: 40px;
+            border: 2px solid var(--gold); padding: 40px; border-radius: 35px;
             text-align: center; width: 85%; max-width: 350px; 
-            background: rgba(20,20,20,0.9); box-shadow: 0 0 80px rgba(255, 193, 7, 0.4);
+            background: rgba(20,20,20,0.95); box-shadow: 0 0 50px rgba(255, 193, 7, 0.2);
         }
         .start-btn {
             background: linear-gradient(135deg, #FFC107, #FF8F00); 
             color: #000; border: none; padding: 22px 50px;
             font-size: 1.6rem; font-weight: bold; border-radius: 50px; margin-top: 30px;
             cursor: pointer; box-shadow: 0 0 30px var(--gold); width: 100%; display: block;
+            transition: transform 0.1s;
         }
+        .start-btn:active { transform: scale(0.96); }
 
-        /* --- هدر --- */
+        /* --- هدر (با بلور، چون ثابت است) --- */
         header { 
-            height: 160px; background: linear-gradient(180deg, rgba(0,0,0,0.95), transparent); 
+            height: 160px; background: rgba(0,0,0,0.6);
             padding: 15px 25px; display: flex; flex-direction: column; justify-content: center; z-index:10; 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 20px; }
+        .row { display: flex; justify-content: space-between; align-items: flex-end; width: 100%; margin-bottom: 15px; }
         
-        /* کپسول منابع - استایل جدید */
         .pill { 
             background: rgba(40,40,40,0.8); border: var(--glass-border); border-radius: 30px; 
             padding: 8px 15px 8px 45px; display: flex; align-items: center; position: relative;
             min-width: 110px; height: 50px;
-            backdrop-filter: blur(10px); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
         }
         
-        /* آیکون‌های بیرون زده و بزرگ */
         .pill img { 
-            width: 65px; height: 65px; 
-            position: absolute; left: -15px; top: -10px;
-            object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7)); 
-            z-index: 2;
+            width: 65px; height: 65px; position: absolute; left: -15px; top: -10px;
+            object-fit: contain; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.7)); z-index: 2;
         }
         
         .alt-emoji { display: none; font-size: 2rem; position: absolute; left: 5px; top: 5px; }
-
         .pill span { font-weight: bold; font-size: 1.4rem; width: 100%; text-align: center; }
         
+        .rank-box { text-align: center; }
+        .rank-label { font-size: 0.8rem; color: #aaa; margin-bottom: -2px; }
         .rank-title { font-size: 1.5rem; color: var(--gold); font-weight: bold; text-shadow: 0 0 15px var(--gold); }
-        .rank-label { font-size: 0.8rem; color: #aaa; text-align: center; margin-bottom: -5px; }
 
         /* نوار XP */
         .xp-con { width: 100%; display: flex; flex-direction: column; gap: 5px; margin-top: 5px; }
-        .xp-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444; }
+        .xp-bg { width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; }
         .xp-fill { 
             height: 100%; background: linear-gradient(90deg, #00C6FF, #0072FF); width: 0%; 
-            transition: width 0.3s; box-shadow: 0 0 15px #0072FF;
+            transition: width 0.3s ease-out; box-shadow: 0 0 15px #0072FF;
         }
 
         /* --- بدنه --- */
         #game-area { flex: 1; position: relative; width: 100%; }
+        
         .tab-view { 
             position: absolute; inset: 0; display: none; flex-direction: column; 
             align-items: center; padding: 25px; overflow-y: auto; padding-bottom: 130px; 
+            /* حذف انیمیشن‌های سنگین برای روانی اجرا */
         }
         .tab-view.active-tab { display: flex; }
 
-        /* کارت‌ها */
+        /* کارت‌ها (بهینه‌سازی شده برای سرعت) */
         .card { 
-            background: var(--glass); border: var(--glass-border); border-radius: 30px; 
+            background: var(--card-bg); /* رنگ سالید به جای شیشه بلوری برای پرفورمنس */
+            border: var(--glass-border); border-radius: 30px; 
             padding: 25px; width: 100%; max-width: 380px; text-align: center; margin-bottom: 25px; 
-            box-shadow: 0 15px 50px rgba(0,0,0,0.5); backdrop-filter: blur(25px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            /* بلور از اینجا حذف شد تا اسکرول لگ نزند */
         }
         .img-box { 
             width: 220px; height: 220px; margin: 0 auto 20px; 
@@ -106,26 +114,26 @@
         .btn:active { transform: scale(0.97); }
         
         .btn-act { background: linear-gradient(145deg, #3e2723, #251614); color: var(--gold); border: 1px solid #5d4037; box-shadow: 0 6px 0 #1b0e0c; }
-        .btn-act:disabled { background: #222; color: #555; box-shadow: none; transform: translateY(6px); border-color: #333; }
+        .btn-act:disabled { background: #222; color: #666; box-shadow: none; transform: translateY(6px); border-color: #333; }
         
         .btn-glean { background: linear-gradient(145deg, #00695c, #004d40); color: #fff; box-shadow: 0 6px 0 #00251a; }
         .btn-buy { background: linear-gradient(145deg, #2e7d32, #1b5e20); color: #fff; box-shadow: 0 6px 0 #0d330f; }
 
-        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 18px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.6rem; }
+        .timer { position: absolute; inset: 0; background: rgba(0,0,0,0.9); border-radius: 18px; display: none; align-items: center; justify-content: center; color: var(--gold); font-size: 1.6rem; font-family: monospace; }
         .btn.loading .timer { display: flex; }
 
-        /* نوار پایین */
+        /* --- نوار پایین --- */
         nav { 
-            height: 100px; background: rgba(10,10,10,0.95); 
+            height: 100px; background: rgba(10,10,10,0.85); 
             display: grid; grid-template-columns: repeat(4, 1fr); 
             border-top: 1px solid rgba(255,255,255,0.1); z-index: 50; 
-            position: relative; backdrop-filter: blur(15px);
+            position: relative; 
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
-        /* خط طلایی */
         #nav-indicator {
             position: absolute; top: 0; right: 0; width: 25%; height: 4px;
             background: var(--gold); box-shadow: 0 0 15px var(--gold);
-            transition: right 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+            transition: right 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* انیمیشن سریعتر */
             border-radius: 0 0 5px 5px;
         }
         .nav-btn { 
@@ -136,8 +144,11 @@
         .nav-btn.active { color: var(--gold); text-shadow: 0 0 10px rgba(255,193,7,0.5); }
         .icon { font-size: 2rem; margin-bottom: 5px; }
 
+        /* استایل مخصوص تب خاندان (خاکستری و خاموش) */
+        #nav-4.grayscale-mode { filter: grayscale(100%); opacity: 0.7; }
+        #view-tribe { filter: grayscale(100%); }
+
         #toast { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); background: #222; border: 2px solid var(--gold); color: var(--gold); padding: 15px 30px; border-radius: 15px; display: none; z-index: 20000; white-space: nowrap; font-size: 1.1rem; }
-        
         .lock-msg { color: #ef5350; font-weight: bold; background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 10px; display:inline-block; }
     </style>
 </head>
@@ -237,14 +248,15 @@
         <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span><br>کشت</button>
         <button id="nav-2" class="nav-btn"><span class="icon">🔨</span><br>آهنگری</button>
         <button id="nav-3" class="nav-btn"><span class="icon">🐏</span><br>گله</button>
-        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span><br>خاندان</button>
+        <button id="nav-4" class="nav-btn grayscale-mode"><span class="icon">🛡️</span><br>خاندان</button>
     </nav>
 
     <div id="toast">پیام</div>
 
     <script>
     const T_M = 60; 
-    const SAVE_KEY = 'PARSEH_V63_FINAL_RENAME';
+    // نکته مهم: این کلید را هرگز تغییر ندهید تا اطلاعات کاربران پاک نشود
+    const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; 
 
     const toFarsi = (n) => {
         const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
@@ -254,7 +266,6 @@
     const CFG = {
         farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
         animals: [
-            // تغییر نام فایل گاو به animal_cow.png (شما باید در گیت‌هاب هم تغییر دهید)
             {id:'cow', n:'گاو شیرده', c:55, f:5, t:20*T_M, out:3, img:'animal_cow.png', icon:'🐄', lvl:2},
             {id:'sheep', n:'گوسفند', c:35, f:2, t:25*T_M, out:2, img:'sheep.png', icon:'🐑', lvl:3},
             {id:'goat', n:'بز کوهی', c:20, f:3, t:35*T_M, out:0.91, img:'goat.png', icon:'🐐', lvl:5}
@@ -268,9 +279,13 @@
 
     function el(id) { return document.getElementById(id); }
     function now() { return Math.floor(Date.now()/1000); }
+    
+    // ذخیره‌سازی فقط روی لوکال (برای سرعت و جلوگیری از لگ تلگرام)
     function save() { 
-        const json = JSON.stringify(G);
-        try { localStorage.setItem(SAVE_KEY, json); } catch(e){}
+        try { 
+            const json = JSON.stringify(G);
+            localStorage.setItem(SAVE_KEY, json); 
+        } catch(e){}
     }
     
     function load(cb) {
@@ -369,7 +384,8 @@
         el("bar-dur").style.width = (G.dur/3)*100+"%";
 
         let req = CFG.levels[Math.min(G.lvl,8)-1];
-        el("v-xp").innerText = toFarsi(G.xp)+" / "+toFarsi(req)+" بَهر";
+        // نمایش رند برای کاربر (Math.floor) اما محاسبه دقیق در پس‌زمینه
+        el("v-xp").innerText = toFarsi(Math.floor(G.xp))+" / "+toFarsi(req)+" بَهر";
         
         let pct = (G.lvl>=8) ? 100 : Math.floor((G.xp/req)*100);
         el("bar-xp").style.width = pct + "%";
@@ -397,13 +413,7 @@
             let has=G.animals[a.id], busy=G.end[a.id]>now(), lock=G.lvl<a.lvl;
             
             h += `<div class="card"><h2>${a.n}</h2>`;
-            // فال‌بک تضمینی: اگر عکس لود نشد، دیسپلی آن none میشود و ایموجی block میشود
-            h += `<div class="img-box">
-                    <img src="images/${a.img}" class="card-img" 
-                         onload="this.style.display='block'; this.nextElementSibling.style.display='none'" 
-                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-                    <div class="big-emoji" style="display:none;">${a.icon}</div>
-                  </div>`;
+            h += `<div class="img-box"><img src="images/${a.img}" class="card-img" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="big-emoji">${a.icon}</div></div>`;
             
             if (lock) h += `<div class="lock-msg">قفل (رتبه ${CFG.ranks[a.lvl-1]})</div>`;
             else if(!has) h += `<button class="btn btn-buy" onclick="window.buy('${a.id}')">خرید (${toFarsi(a.c)} دریک)</button>`;
@@ -425,6 +435,7 @@
             }
         }
 
+        // بروزرسانی روان‌تر تایمرها (بدون گیر کردن)
         if(G.end.farm > n) el('t-farm').innerText = fmt(G.end.farm - n);
         else if(G.end.farm > 0) finFarm();
 
@@ -447,10 +458,12 @@
     }
 
     window.onload = function() {
-        if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.expand();
-            window.Telegram.WebApp.setHeaderColor('#000000');
-        }
+        try {
+            if (window.Telegram?.WebApp) {
+                window.Telegram.WebApp.expand();
+                window.Telegram.WebApp.setHeaderColor('#000000');
+            }
+        } catch(e){}
         
         load(function(){
             if(G.seen) el('start-modal').style.display='none';
