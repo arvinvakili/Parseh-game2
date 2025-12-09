@@ -73,24 +73,24 @@
             <div style="font-size:4rem; margin-bottom:15px;">🏛️</div>
             <h1 style="color:var(--gold); margin-bottom: 10px;">امپراطوری پارسه</h1>
             <p style="color:#aaa;">خوش آمدید، ای فرمانروا...</p>
-            <button class="start-btn" id="btn-enter">ورود</button>
+            <button class="start-btn" onclick="window.startGame()">ورود</button>
         </div>
     </div>
 
     <header>
         <div class="row">
             <div class="pill">
-                <img src="images/bread.png" class="res-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1046/1046784.png'">
+                <img src="https://cdn-icons-png.flaticon.com/512/1046/1046784.png" class="res-icon" alt="نان">
                 <span id="v-bread">۰</span>
             </div>
-            <div class="rank-box" id="rank-trigger">
+            <div class="rank-box" onclick="window.adminClick()">
                 <div class="rank-label">جایگاه</div>
                 <div class="rank-title" id="v-rank">برزیگر</div>
                 <div class="score-label">ارج: <span id="v-score">۰</span></div>
             </div>
             <div class="pill">
                 <span id="v-coin">۰</span>
-                <img src="images/daric.png" class="res-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/217/217853.png'">
+                <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" class="res-icon" alt="دریک">
             </div>
         </div>
         <div style="text-align:center; font-size:0.8rem; color:#aaa;">
@@ -106,8 +106,8 @@
                 <img src="https://cdn-icons-png.flaticon.com/512/2921/2921822.png" class="animal-img">
                 <div style="display:flex; justify-content:space-between; color:#aaa; font-size:0.9rem; margin-top:5px;"><span>توان ابزار</span> <span id="v-dur">۳/۳</span></div>
                 <div style="width:100%; height:5px; background:#000; border-radius:3px; margin:5px 0 10px;"><div id="bar-dur" style="width:100%; height:100%; background:orange;"></div></div>
-                <button id="btn-farm" class="btn btn-act">کشت (۳۵ دَم)<div class="timer-badge" id="t-farm">۰۰:۰۰</div></button>
-                <button id="btn-glean" class="btn btn-glean">خوشه‌چینی (شتابان)<div class="timer-badge" id="t-glean">۰۰:۰۰</div></button>
+                <button id="btn-farm" class="btn btn-act" onclick="window.actFarm()">کشت (۳۵ دَم)<div class="timer-badge" id="t-farm">۰۰:۰۰</div></button>
+                <button id="btn-glean" class="btn btn-glean" onclick="window.actGlean()">خوشه‌چینی (شتابان)<div class="timer-badge" id="t-glean">۰۰:۰۰</div></button>
             </div>
         </div>
 
@@ -115,23 +115,23 @@
             <div class="card">
                 <h2>آهنگرسرا</h2>
                 <img src="https://cdn-icons-png.flaticon.com/512/2972/2972097.png" class="animal-img">
-                <button id="btn-rep" class="btn btn-act">بازسازی (۱۵ دَم)<div class="timer-badge" id="t-rep">۰۰:۰۰</div></button>
+                <button id="btn-rep" class="btn btn-act" onclick="window.actRep()">بازسازی (۱۵ دَم)<div class="timer-badge" id="t-rep">۰۰:۰۰</div></button>
             </div>
         </div>
 
         <div id="view-herd" class="tab-view">
-            <button id="btn-market-open" class="btn btn-sell" style="margin-bottom:15px;">💰 ورود به بازار 💰</button>
+            <button id="btn-market-open" class="btn btn-sell" style="margin-bottom:15px;" onclick="window.toggleMarket(true)">💰 ورود به بازار 💰</button>
             
             <div id="market-panel" style="display:none; width:100%;">
                 <div class="card" style="border-color: var(--green);">
-                    <img src="images/merchant.png" class="animal-img" style="width:100px; height:100px; border-radius:50%; margin:0 auto; border:2px solid gold;" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png'">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="animal-img" style="width:100px; height:100px; border-radius:50%; margin:0 auto;">
                     <h2 id="merchant-txt" style="color:var(--green)">پیشنهاد بازرگان</h2>
                     <p id="offer-txt" style="font-size:1.1rem; font-weight:bold;">بها: ۱ دریک</p>
                     <div style="display:flex; gap:10px;">
-                        <button id="btn-accept-deal" class="btn btn-sell">🤝 پذیرش</button>
-                        <button id="btn-open-gauge" class="btn btn-risk">🗣️ گفتگو</button>
+                        <button class="btn btn-sell" onclick="window.acceptDeal()">🤝 پذیرش</button>
+                        <button class="btn btn-risk" onclick="window.openGauge()">🗣️ گفتگو</button>
                     </div>
-                    <button id="btn-exit-market" class="btn btn-act" style="margin-top:10px;">بازگشت</button>
+                    <button class="btn btn-act" onclick="window.toggleMarket(false)" style="margin-top:10px;">بازگشت</button>
                 </div>
             </div>
             <div id="herd-box" style="width:100%"></div>
@@ -145,25 +145,25 @@
             </div>
             <div id="clan-content" class="card">
                 <h2>سرباز جاویدان</h2>
-                <img src="images/soldier.png" class="animal-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3063/3063823.png'">
+                <img src="https://cdn-icons-png.flaticon.com/512/3063/3063823.png" class="animal-img">
                 <div style="text-align:center; margin-bottom:10px;">
                     <div style="color:#aaa;">نیرومندی: <span id="s-lvl" style="color:var(--gold); font-weight:bold;">۱</span>/۵</div>
                     <div class="xp-con"><div class="xp-bg"><div class="xp-fill" id="s-bar" style="width:0%; background:var(--gold);"></div></div></div>
                 </div>
-                <button id="btn-feed" class="btn btn-act">🍖 تغذیه سرباز (۱۰ نان)</button>
-                <button id="btn-open-invite" class="btn btn-royal" style="margin-top:10px;">📣 فراخوان یاران</button>
+                <button class="btn btn-act" onclick="window.feedSoldier()">🍖 تغذیه سرباز (۱۰ نان)</button>
+                <button class="btn btn-royal" onclick="window.openInvite()" style="margin-top:10px;">📣 فراخوان یاران</button>
             </div>
         </div>
     </div>
 
     <nav>
         <div id="nav-indicator"></div>
-        <button id="nav-1" class="nav-btn active"><span class="icon">🌾</span>کشت</button>
-        <button id="nav-2" class="nav-btn"><span class="icon">🔨</span>آهنگری</button>
-        <button id="nav-3" class="nav-btn">
+        <button id="nav-1" class="nav-btn active" onclick="window.switchTab(1)"><span class="icon">🌾</span>کشت</button>
+        <button id="nav-2" class="nav-btn" onclick="window.switchTab(2)"><span class="icon">🔨</span>آهنگری</button>
+        <button id="nav-3" class="nav-btn" onclick="window.switchTab(3)">
             <div class="icon-container" id="nav-icon-3"><span class="icon">🐏</span>گله</div>
         </button>
-        <button id="nav-4" class="nav-btn"><span class="icon">🛡️</span>دودمان</button>
+        <button id="nav-4" class="nav-btn" onclick="window.switchTab(4)"><span class="icon">🛡️</span>دودمان</button>
     </nav>
 
     <div id="invite-modal" class="modal-overlay">
@@ -175,10 +175,10 @@
             </ul>
             <div id="invite-link-box" style="background:#222; padding:8px; border-radius:8px; margin:10px 0; font-size:0.7rem; color:#888; overflow-wrap:anywhere;"></div>
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button id="btn-share" class="btn btn-royal">📨 هم‌رسانی</button>
-                <button id="btn-copy" class="btn btn-act">📋 رونوشت</button>
+                <button class="btn btn-royal" onclick="window.shareLink()">📨 هم‌رسانی</button>
+                <button class="btn btn-act" onclick="window.copyLink()">📋 رونوشت</button>
             </div>
-            <button id="btn-invite-close" class="btn btn-risk" style="margin-top:10px;">بازگشت</button>
+            <button class="btn btn-risk" onclick="document.getElementById('invite-modal').style.display='none'" style="margin-top:10px;">بازگشت</button>
         </div>
     </div>
 
@@ -189,7 +189,7 @@
                 <div class="gauge-arc"></div>
                 <div id="gauge-needle" class="gauge-needle"></div>
             </div>
-            <button id="btn-stop-gauge" class="btn btn-risk">✋ ایست!</button>
+            <button class="btn btn-risk" onclick="window.stopGauge()">✋ ایست!</button>
         </div>
     </div>
 
@@ -202,8 +202,8 @@
             <div class="admin-row"><span>نان:</span><input id="adm-bread" type="number" class="admin-input"></div>
             <div class="admin-row"><span>دریک:</span><input id="adm-coin" type="number" class="admin-input"></div>
             <div class="admin-row"><span>رده:</span><input id="adm-lvl" type="number" class="admin-input"></div>
-            <button id="btn-adm-save" class="btn btn-royal">💾 ذخیره</button>
-            <button id="btn-adm-close" class="btn btn-act">بستن</button>
+            <button class="btn btn-royal" onclick="window.saveAdmin()">💾 ذخیره</button>
+            <button class="btn btn-act" onclick="document.getElementById('admin-modal').style.display='none'">بستن</button>
         </div>
     </div>
 
@@ -211,13 +211,11 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        
-        // ----------------------------------------------------
-        const BOT_USERNAME = 'Parseh_Empire_Bot'; // آیدی صحیح
-        // ----------------------------------------------------
+        // نام ربات شما (تصحیح شده و تضمینی)
+        const BOT_USERNAME = 'Parseh_Empire_Bot';
 
         const T_M = 60; 
-        const SAVE_KEY = 'PARSEH_EMPIRE_MAIN_DB'; 
+        const SAVE_KEY = 'PARSEH_EMPIRE_V90'; 
         let G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0,glean:0,rep:0}, animals:{}, seen:false, pt:0, soldierLvl:1, soldierXp:0 };
         let currentPrice = 1.0;
         let gaugeAnim = null;
@@ -248,26 +246,14 @@
         const fmt = (s) => { if(s<0)s=0; let m=Math.floor(s/60),sec=s%60; return toFarsi((m<10?'0':'')+m+':'+(sec<10?'0':'')+sec); };
 
         function save() { try{localStorage.setItem(SAVE_KEY, JSON.stringify(G));}catch(e){} }
+        function load() { let local=localStorage.getItem(SAVE_KEY); if(local) try{G={...G, ...JSON.parse(local)};}catch(e){} }
         function msg(txt) { let e=el("toast"); e.innerText=txt; e.style.display="block"; setTimeout(()=>e.style.display="none", 2000); }
 
-        function load() {
-            let local = localStorage.getItem(SAVE_KEY);
-            if(local) try{G = {...G, ...JSON.parse(local)};}catch(e){}
-        }
+        window.startGame = function() { el('start-modal').style.display='none'; G.seen=true; save(); msg("درود بر شما"); render(); };
 
-        // --- شروع ---
-        el('btn-enter').addEventListener('click', () => {
-            el('start-modal').style.display='none'; 
-            G.seen=true; 
-            save(); 
-            msg("درود بر شما"); 
-            render();
-        });
-
-        // --- تایمرها ---
+        // --- تایمرهای زنده ---
         function updateTimers() {
             const n = now();
-            // دکمه‌های اصلی
             ['farm','glean','rep'].forEach(k => {
                 let btn = el('btn-'+k), tm = el('t-'+k);
                 if(G.end[k] > n) {
@@ -284,7 +270,6 @@
                     btn.disabled = (k==='farm' && G.dur<=0) || (k==='rep' && G.dur>=3);
                 }
             });
-            // حیوانات
             CFG.animals.forEach(a => {
                 if(!G.animals[a.id]) return;
                 let btn = el('btn-milk-'+a.id), tm = el('tm-'+a.id);
@@ -302,41 +287,32 @@
             });
         }
 
-        // اکشن‌ها
-        el('btn-farm').addEventListener('click', () => { if(G.dur<=0)return msg("ابزار فرسوده است"); G.end.farm=now()+CFG.farm; save(); updateTimers(); });
-        el('btn-glean').addEventListener('click', () => { G.end.glean=now()+CFG.glean; save(); updateTimers(); });
-        el('btn-rep').addEventListener('click', () => { G.end.rep=now()+CFG.rep; save(); updateTimers(); });
+        window.actFarm = function() { if(G.dur<=0)return msg("ابزار فرسوده است"); G.end.farm=now()+CFG.farm; save(); updateTimers(); };
+        window.actGlean = function() { G.end.glean=now()+3; save(); updateTimers(); };
+        window.actRep = function() { G.end.rep=now()+CFG.rep; save(); updateTimers(); };
 
-        window.buy = (id) => { 
+        window.buy = function(id) { 
             let a=CFG.animals.find(x=>x.id==id); 
             if(G.coins<a.c)return msg("دریک کافی نیست"); 
             G.coins-=a.c; G.animals[id]=true; 
             save(); renderHerd(); render(); 
         };
-        window.milk = (id) => { 
+        window.milk = function(id) { 
             let a=CFG.animals.find(x=>x.id==id); 
             if(G.bread<a.f)return msg("نان کافی نیست"); 
             G.bread-=a.f; G.end[id]=now()+a.t; 
             save(); renderHerd(); render(); 
         };
 
-        // بازار
-        el('btn-market-open').addEventListener('click', () => {
-            el('nav-3').classList.add('market-mode');
-            el('herd-box').style.display = 'none';
-            el('market-panel').style.display = 'block';
-            el('btn-market-open').style.display = 'none';
-            currentPrice=1.0; el('offer-txt').innerText='بها: ۱ دریک';
-        });
-        
-        el('btn-exit-market').addEventListener('click', () => {
-            el('nav-3').classList.remove('market-mode');
-            el('herd-box').style.display = 'block';
-            el('market-panel').style.display = 'none';
-            el('btn-market-open').style.display = (G.milk>0) ? 'block' : 'none';
-        });
+        window.toggleMarket = function(show) {
+            el('nav-3').classList.toggle('market-mode', show);
+            el('herd-box').style.display = show ? 'none' : 'block';
+            el('market-panel').style.display = show ? 'block' : 'none';
+            el('btn-market-open').style.display = (show || G.milk<=0) ? 'none' : 'block';
+            if(show) { currentPrice=1.0; el('offer-txt').innerText='بها: ۱ دریک'; }
+        };
 
-        el('btn-open-gauge').addEventListener('click', () => {
+        window.openGauge = function() {
             el('gauge-modal').style.display='flex';
             let start = Date.now();
             const animate = () => {
@@ -347,9 +323,9 @@
                 gaugeAnim = requestAnimationFrame(animate);
             };
             gaugeAnim = requestAnimationFrame(animate);
-        });
+        };
 
-        el('btn-stop-gauge').addEventListener('click', () => {
+        window.stopGauge = function() {
             cancelAnimationFrame(gaugeAnim);
             setTimeout(()=>{
                 let win = Math.random() > 0.4; 
@@ -357,76 +333,71 @@
                 el('offer-txt').innerText = `بها: ${toFarsi(currentPrice)} دریک`;
                 el('gauge-modal').style.display='none';
             }, 200);
-        });
+        };
 
-        el('btn-accept-deal').addEventListener('click', () => {
+        window.acceptDeal = function() {
             if(G.milk<=0) return;
             let inc = Math.floor(G.milk * currentPrice);
             G.coins+=inc; G.milk=0; msg(`داد و ستد شد: +${toFarsi(inc)} دریک`);
-            save(); render(); el('btn-exit-market').click();
-        });
+            save(); render(); window.toggleMarket(false);
+        };
 
-        // دعوت و ادمین
-        el('btn-open-invite').addEventListener('click', () => {
+        window.openInvite = function() { 
             el('invite-modal').style.display='flex';
             let uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TEST';
             let link = `https://t.me/${BOT_USERNAME}?start=ref_${uid}`;
             el('invite-link-box').innerText = link;
-        });
-        el('btn-invite-close').addEventListener('click', () => el('invite-modal').style.display='none');
+        };
         
-        el('btn-share').addEventListener('click', () => {
+        window.shareLink = function() {
             let uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TEST';
             let url = `https://t.me/share/url?url=https://t.me/${BOT_USERNAME}?start=ref_${uid}&text=به پارسه بپیوند!`;
             window.open(url, '_blank');
-        });
-        el('btn-copy').addEventListener('click', () => {
+        };
+        window.copyLink = function() {
             let uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TEST';
             navigator.clipboard.writeText(`https://t.me/${BOT_USERNAME}?start=ref_${uid}`).then(()=>msg("رونوشت شد"));
-        });
+        };
 
-        el('rank-trigger').addEventListener('click', () => {
+        window.adminClick = function() {
             adminTaps++;
             if(adminTaps>=7) { 
                 el('admin-modal').style.display='flex'; 
                 el('adm-bread').value=G.bread; el('adm-coin').value=G.coins; el('adm-lvl').value=G.lvl;
-                el('admin-users-list').innerHTML = `<tr><td>شما</td><td>فرمانروا</td><td>${toFarsi(G.coins)}</td></tr>`;
+                let uid = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 'شما';
+                el('admin-users-list').innerHTML = `<tr><td>${uid}</td><td>${CFG.ranks[Math.min(G.lvl,8)-1]}</td><td>${toFarsi(G.coins)}</td></tr>`;
                 adminTaps=0; 
             }
-        });
-        el('btn-adm-save').addEventListener('click', () => {
+        };
+        window.saveAdmin = function() {
             G.bread=parseInt(el('adm-bread').value); G.coins=parseInt(el('adm-coin').value); G.lvl=parseInt(el('adm-lvl').value);
             save(); render(); el('admin-modal').style.display='none';
-        });
-        el('btn-adm-close').addEventListener('click', () => el('admin-modal').style.display='none');
+        };
 
-        el('btn-feed').addEventListener('click', () => {
+        window.switchTab = function(n) {
+            if(n!==3) window.toggleMarket(false);
+            el('nav-indicator').style.right = ((n-1)*25)+'%';
+            document.querySelectorAll('.tab-view').forEach(x=>x.classList.remove('active-tab'));
+            document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+            el('view-'+['farm','smith','herd','tribe'][n-1]).classList.add('active-tab');
+            el('nav-'+n).classList.add('active');
+            if(n===3) { renderHerd(); el('btn-market-open').style.display = G.milk>0 ? 'block' : 'none'; }
+            if(n===4) {
+                let lock = G.lvl<3;
+                el('clan-lock').style.display = lock?'block':'none';
+                el('clan-content').style.display = lock?'none':'block';
+                if(!lock) renderSoldier();
+            }
+        };
+
+        window.feedSoldier = function() {
             if(G.soldierLvl>=5)return msg("سرباز کامل است");
             if(G.bread<10)return msg("نان کافی نیست");
             G.bread-=10; G.soldierXp+=10;
             if(G.soldierXp >= CFG.clanReq[G.soldierLvl-1]) { G.soldierXp=0; G.soldierLvl++; msg("سرباز ارتقا یافت!"); }
             else msg("سرباز تغذیه شد");
             save(); render(); renderSoldier();
-        });
-
-        // منو
-        [1,2,3,4].forEach(n => {
-            el('nav-'+n).addEventListener('click', () => {
-                if(n!==3) el('btn-exit-market').click();
-                el('nav-indicator').style.right = ((n-1)*25)+'%';
-                document.querySelectorAll('.tab-view').forEach(x=>x.classList.remove('active-tab'));
-                document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-                el('view-'+['farm','smith','herd','tribe'][n-1]).classList.add('active-tab');
-                el('nav-'+n).classList.add('active');
-                if(n===3) { renderHerd(); el('btn-market-open').style.display = G.milk>0 ? 'block' : 'none'; }
-                if(n===4) {
-                    let lock = G.lvl<3;
-                    el('clan-lock').style.display = lock?'block':'none';
-                    el('clan-content').style.display = lock?'none':'block';
-                    if(!lock) renderSoldier();
-                }
-            });
-        });
+        };
 
         function render() {
             el('v-bread').innerText=toFarsi(G.bread); el('v-coin').innerText=toFarsi(G.coins); el('v-milk').innerText=toFarsi(Math.floor(G.milk));
@@ -445,17 +416,20 @@
         }
 
         function renderHerd() {
+            if(isMarketMode) return;
             let h = "";
             CFG.animals.forEach(a => {
                 if(G.end[a.id]===undefined) G.end[a.id]=0;
                 let has = G.animals[a.id], busy = G.end[a.id]>now(), lock = G.lvl<a.lvl;
+                let imgSrc = a.img;
+                
                 h += `<div class="card"><h2>${a.n}</h2>
                 <div class="img-box">
-                    <img src="${a.img}" class="animal-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1046/1046784.png'">
+                    <img src="${imgSrc}" class="animal-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1046/1046784.png'">
                 </div>
                 ${lock ? `<div style="color:var(--red); font-size:0.9rem">قفل (جایگاه ${CFG.ranks[a.lvl-1]})</div>` : 
-                  !has ? `<button class="btn btn-buy" onclick="buy('${a.id}')">خرید (${toFarsi(a.c)} دریک)</button>` : 
-                  `<button class="btn btn-act" id="btn-milk-${a.id}" onclick="milk('${a.id}')">
+                  !has ? `<button class="btn btn-buy" onclick="window.buy('${a.id}')">خرید (${toFarsi(a.c)} دریک)</button>` : 
+                  `<button class="btn btn-act" id="btn-milk-${a.id}" onclick="window.milk('${a.id}')">
                      دوشیدن (${toFarsi(a.f)} نان)
                      <div class="timer-badge" id="tm-${a.id}">۰۰:۰۰</div>
                    </button>`}
@@ -464,7 +438,6 @@
             el("herd-box").innerHTML = h;
         }
 
-        // اجرا
         load();
         if(window.Telegram?.WebApp) { window.Telegram.WebApp.expand(); window.Telegram.WebApp.setHeaderColor('#000000'); }
         if(G.seen) el('start-modal').style.display='none';
