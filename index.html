@@ -15,8 +15,9 @@
             color: #fff; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
         }
 
-        /* تصاویر خالص (بدون دستکاری) */
+        /* تصاویر */
         .res-icon { width: 40px; height: 40px; object-fit: contain; vertical-align: middle; }
+        /* FIX: کلاس animal-img وجود نداشت، اینجا main-img استفاده می‌شود که برای همه تصاویر مناسب است */
         .main-img { width: 100%; height: 140px; object-fit: contain; display: block; margin: 10px auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5)); }
         .circle-img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 2px solid var(--gold); margin: 0 auto; display: block; }
 
@@ -86,7 +87,7 @@
 
     <div id="start-modal" class="modal-overlay" style="display:flex;">
         <div class="modal-box">
-            <img src="images/shovel.png" class="main-img" style="height:100px;">
+            <img src="images/shovel.png" class="main-img" style="height:100px;" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmQ3MDAiIHN0cm9rZS13aWR0aD0iMiI+PHBhdGggZD0iTTIgMjJsMTAtMTBtMCAwbDItMm0tMiAyTDcgN201IDVsNS01bS01IDVsMiAyIi8+PC9zdmc+'">
             <h1 style="color:var(--gold); margin-bottom: 10px;">امپراطوری پارسه</h1>
             <p style="color:#aaa;">بازگشت به شکوه تاریخ...</p>
             <button class="start-btn" onclick="window.startGame()">ورود به بازی</button>
@@ -96,7 +97,7 @@
     <header>
         <div class="row">
             <div class="pill">
-                <img src="images/bread.png" class="res-icon">
+                <img src="images/bread.png" class="res-icon" onerror="this.style.display='none'">
                 <span id="v-bread">۰</span>
             </div>
             <div class="rank-box" onclick="window.adminClick()">
@@ -106,7 +107,7 @@
             </div>
             <div class="pill">
                 <span id="v-coin">۰</span>
-                <img src="images/daric.png" class="res-icon">
+                <img src="images/daric.png" class="res-icon" onerror="this.style.display='none'">
             </div>
         </div>
         <div style="text-align:center; font-size:0.8rem; color:#aaa;">
@@ -229,25 +230,28 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         
-        // نام ربات شما (بدون تغییر)
+        // نام ربات شما
         const BOT_USERNAME = 'Parseh_Empire_Bot';
 
-        // تشخیص شناسه کاربر برای ذخیره‌سازی اختصاصی
+        // FIX: جلوگیری از خطا در صورتی که در مرورگر معمولی تست شود
         let userId = 'user_local';
-        if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-            userId = window.Telegram.WebApp.initDataUnsafe.user.id.toString();
+        let initData = {};
+        if (window.Telegram?.WebApp) {
+            initData = window.Telegram.WebApp.initDataUnsafe || {};
+            if (initData.user?.id) userId = initData.user.id.toString();
         }
         
         const T_M = 60; 
-        // کلید ذخیره‌سازی: ترکیب نام بازی + شناسه کاربر (برای جلوگیری از تداخل اکانت‌ها)
         const SAVE_KEY = `PARSEH_FINAL_DB_${userId}`; 
         
+        // FIX: متغیر isMarketMode تعریف نشده بود
+        let isMarketMode = false;
+
         let G = { bread:0, coins:0, milk:0, dur:3, lvl:1, xp:0, end:{farm:0,glean:0,rep:0}, animals:{}, seen:false, pt:0, soldierLvl:1, soldierXp:0 };
         let currentPrice = 1.0;
         let gaugeAnim = null;
         let adminTaps = 0;
 
-        // فقط نام فایل‌های محلی
         const CFG = {
             farm: 35 * T_M, glean: 3, rep: 15 * T_M, maxDur: 3,
             animals: [
@@ -271,16 +275,12 @@
 
         function load() {
             let local = localStorage.getItem(SAVE_KEY);
-            // اگر دیتای جدید نبود، دیتای قدیمی را چک کن (برای انتقال)
             if(!local) local = localStorage.getItem('PARSEH_EMPIRE_MAIN_DB');
-            
             if(local) try{G = {...G, ...JSON.parse(local)};}catch(e){}
         }
 
-        // --- شروع ---
         window.startGame = function() { el('start-modal').style.display='none'; G.seen=true; save(); msg("درود بر شما"); render(); };
 
-        // --- تایمرهای زنده ---
         function updateTimers() {
             const n = now();
             // دکمه‌های اصلی
@@ -319,7 +319,7 @@
         }
 
         window.actFarm = function() { if(G.dur<=0)return msg("ابزار فرسوده است"); G.end.farm=now()+CFG.farm; save(); updateTimers(); };
-        window.actGlean = function() { G.end.glean=now()+3; save(); updateTimers(); }; // ۳ ثانیه
+        window.actGlean = function() { G.end.glean=now()+3; save(); updateTimers(); };
         window.actRep = function() { G.end.rep=now()+CFG.rep; save(); updateTimers(); };
 
         window.buy = function(id) { 
@@ -336,11 +336,13 @@
         };
 
         window.toggleMarket = function(show) {
-            el('nav-3').classList.toggle('market-mode', show);
+            isMarketMode = show; // FIX: تغییر متغیر سراسری به جای کلاس CSS
+            el('nav-3').classList.toggle('active', show); // فقط استایل ظاهری
             el('herd-box').style.display = show ? 'none' : 'block';
             el('market-panel').style.display = show ? 'block' : 'none';
             el('btn-market-open').style.display = (show || G.milk<=0) ? 'none' : 'block';
             if(show) { currentPrice=1.0; el('offer-txt').innerText='بها: ۱ دریک'; }
+            renderHerd(); // رندر مجدد برای اعمال تغییرات ویو
         };
 
         window.openGauge = function() {
@@ -358,13 +360,7 @@
 
         window.stopGauge = function() {
             cancelAnimationFrame(gaugeAnim);
-            let rot = el('gauge-needle').style.transform;
-            // استخراج زاویه برای لاجیک ساده
-            let angle = 90;
-            // شانس برنده شدن (ساده‌سازی برای تجربه بهتر)
-            // چون خواندن دقیق ماتریکس در همه مرورگرها یکسان نیست
             let win = Math.random() > 0.4; 
-            
             setTimeout(()=>{
                 if(win) { currentPrice+=0.5; msg("کامیاب شدید!"); } else { currentPrice=0.5; msg("شکست خوردید!"); }
                 el('offer-txt').innerText = `بها: ${toFarsi(currentPrice)} دریک`;
@@ -452,13 +448,14 @@
         }
 
         function renderHerd() {
-            if(isMarketMode) return;
+            if(isMarketMode) return; // FIX: حالا متغیر درست کار می‌کند
             let h = "";
             CFG.animals.forEach(a => {
                 if(G.end[a.id]===undefined) G.end[a.id]=0;
                 let has = G.animals[a.id], busy = G.end[a.id]>now(), lock = G.lvl<a.lvl;
+                // FIX: کلاس animal-img به main-img تغییر کرد
                 h += `<div class="card"><h2>${a.n}</h2>
-                <img src="${a.img}" class="animal-img">
+                <img src="${a.img}" class="main-img"> 
                 ${lock ? `<div style="color:var(--red); font-size:0.9rem">قفل (جایگاه ${CFG.ranks[a.lvl-1]})</div>` : 
                   !has ? `<button class="btn btn-buy" onclick="window.buy('${a.id}')">خرید (${toFarsi(a.c)} دریک)</button>` : 
                   `<button class="btn btn-act" id="btn-milk-${a.id}" onclick="window.milk('${a.id}')">
@@ -470,17 +467,14 @@
             el("herd-box").innerHTML = h;
         }
 
-        // شروع برنامه
         load();
         
-        // چک کردن پارامتر دعوت
         if(window.Telegram?.WebApp) {
             window.Telegram.WebApp.expand();
             window.Telegram.WebApp.setHeaderColor('#000000');
             
-            const initData = window.Telegram.WebApp.initDataUnsafe;
-            if(initData && initData.start_param && !G.seen) {
-                // اگر کاربر با لینک دعوت آمده و تازه وارد است
+            // FIX: بررسی ایمن initData
+            if(initData.start_param && !G.seen) {
                 G.bread += 3;
                 G.coins += 1;
                 msg("پاداش دعوت دریافت شد: ۳ نان و ۱ دریک");
